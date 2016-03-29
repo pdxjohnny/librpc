@@ -1,18 +1,20 @@
 CC=g++
-CFLAGS=-c
+CFLAGS=-c -static -I./include/
 LDFLAGS=
 SOURCES=$(wildcard src/*.cpp)
-OBJECTS=$(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
-LIB=bin/rpc.a
+OBJECTS=$(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
+LIB=bin/rpc
 
 all: $(SOURCES) $(LIB)
 
 $(LIB): $(OBJECTS)
+	@mkdir -p bin
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-.cpp.o:
+obj/%.o: src/%.cpp
+	@mkdir -p obj
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm *.o a.out
+	rm -fv obj/* bin/*
 
