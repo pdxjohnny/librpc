@@ -49,6 +49,9 @@ struct rpc_server_config {
     int port;
     // The NULL terminated array of handlers for each path
     struct rpc_handler * handlers;
+    // Used to stop the server gracefully. This is the file descriptor of
+    // anything that can be feed to select. See man 3 pselect for details
+    int comm;
 };
 
 int rpc_start_server(struct rpc_server_config *);
@@ -67,3 +70,6 @@ int rpc_start_server(struct rpc_server_config *);
 #define ELISTEN 3
 // EACCEPT means that there was an error accepting the connection
 #define EACCEPT 4
+// ESELECT means that there was an error with select when trying to determin if
+// there is a new connection to accept
+#define ESELECT 5
