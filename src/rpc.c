@@ -12,7 +12,7 @@ int rpc_field(char * field, char * ret, struct rpc_message * msg) {
 
 
 // Starts listening and calls handlers based on their applicability to the path
-int rpc_start_server(struct rpc_handler * handlers) {
+int rpc_start_server(struct rpc_server_config * config) {
     int err;
     int server, client;
     struct sockaddr_in server_addr, client_addr;

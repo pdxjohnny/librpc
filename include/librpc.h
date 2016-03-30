@@ -40,8 +40,18 @@ struct rpc_handler {
     int (*handler)(struct rpc_message *);
 };
 
-// Takes a NULL terminated array of rpc_handlers
-int rpc_start_server(struct rpc_handler *);
+// Server config
+struct rpc_server_config {
+    // Address to bind to
+    char * addr;
+    // Port ot bind to (if set to zero it will be set by rpc_start_server once
+    // bound
+    int port;
+    // The NULL terminated array of handlers for each path
+    struct rpc_handler * handlers;
+};
+
+int rpc_start_server(struct rpc_server_config *);
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
