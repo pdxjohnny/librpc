@@ -11,6 +11,11 @@
  *  Needs stuct of data that will be sent to method
 */
 
+// So that cpp can link to this lib
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 // rpc_test should return 42
 int rpc_test();
 
@@ -24,7 +29,7 @@ struct rpc_message {
 
 // Fills field with the data sent over the request
 // return code is 0 for error 1 for success
-int rpc_field(char *);
+int rpc_field(char * field, char * ret, struct rpc_message * msg);
 int rpc_int_field(int *);
 int rpc_float_field(float *);
 int rpc_char_field(char *);
@@ -32,12 +37,16 @@ int rpc_char_field(char *);
 // Server handler
 struct rpc_handler {
     char * URL;
-    int (*handler)(rpc_message *);
+    int (*handler)(struct rpc_message *);
 };
 
 // Takes a NULL terminated array of rpc_handlers
 int rpc_start_server(struct rpc_handler *);
 
+// So that cpp can link to this lib
+#if defined (__cplusplus)
+}
+#endif
 
 // Error codes
 // ENOSOCK could not create server socket

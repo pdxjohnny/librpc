@@ -6,13 +6,13 @@ int rpc_test () {
 }
 
 // Search the response for field and store it in ret
-int rpc_field(char * field, char * ret, rpc_message * msg) {
+int rpc_field(char * field, char * ret, struct rpc_message * msg) {
     return 0;
 };
 
 
 // Starts listening and calls handlers based on their applicability to the path
-int rpc_start_server(struct rpc_handler *) {
+int rpc_start_server(struct rpc_handler * handlers) {
     int err;
     int server, client;
     struct sockaddr_in server_addr, client_addr;
