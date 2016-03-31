@@ -49,6 +49,7 @@ int rpc_server_start(struct rpc_server_config * config) {
     // Set the port in the config
     uint16_t port;
     char port_string[12];
+    memset(port_string, 0, sizeof(port_string));
     // Grab the port it will be in network byte order
     sprintf(port_string, "%d", server_addr.sin_port);
     // Put that network byte order port into a int
@@ -145,6 +146,7 @@ int rpc_server_start(struct rpc_server_config * config) {
 int rpc_server_start_background(struct rpc_server_config * config) {
     int err;
     char buffer[RPC_GET_PORT_BUFFER_SIZE];
+    memset(buffer, 0, sizeof(buffer));
 
     // Create a pipe so we can tell the server when to stop running
     // Read end of the pipe is index 0 write end is index 1
@@ -242,6 +244,9 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     // Send the client some information
     // char msg[] = "Hello World";
     // send(client, msg, strlen(msg), 0);
+
+    // Get rid of the message now that we are done with this client
+    rpc_message_free(&msg);
 
     // Close the connection with the client
     close(client);
