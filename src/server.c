@@ -26,8 +26,8 @@ int rpc_start_server(struct rpc_server_config * config) {
 
     // Configure the server as specified in config
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(config->port);
-    inet_aton(config->addr, &server_addr.sin_addr);
+    server_addr.sin_port = config->port;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Bind the socket
     err = bind(server, (struct sockaddr *) &server_addr, sizeof(server_addr));

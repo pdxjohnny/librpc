@@ -10,6 +10,7 @@
  *
  *  Needs stuct of data that will be sent to method
 */
+#include <stdint.h>
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
@@ -46,7 +47,7 @@ struct rpc_server_config {
     char * addr;
     // Port ot bind to (if set to zero it will be set by rpc_start_server once
     // bound
-    int port;
+    uint16_t port;
     // The NULL terminated array of handlers for each path
     struct rpc_handler * handlers;
     // Used to stop the server gracefully. This is the file descriptor of
@@ -64,7 +65,7 @@ struct rpc_client_config {
     // The address of the server we are connecting to
     char * addr;
     // The port of the server we are connecting to
-    int port;
+    uint16_t port;
     // The message to deliver
     struct rpc_message * msg;
 };
@@ -99,3 +100,5 @@ int rpc_client(struct rpc_client_config * config);
 // EPORT is when the server trys to find out what port it is bound to but it
 // fails
 #define EPORT 7
+// EADDR is when the client cant look up the ip of the hostname given
+#define EADDR 8

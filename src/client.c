@@ -25,8 +25,13 @@ int rpc_client(struct rpc_client_config * config) {
 
     // Make the server address as requested by config
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(config->port);
-    inet_aton(config->addr, &server_addr.sin_addr);
+    server_addr.sin_port = config->port;
+    struct hostent * server_info;
+    server_info = gethostbyname(config->addr);
+    if (!server_info) {
+        return EADDR;
+    }
+    server_addr.sin_addr = *(struct in_addr *) server_info->h_addr;
 
     // Connect the client socket to the server
     err = connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr));
@@ -78,7 +83,7 @@ int rpc_client(struct rpc_client_config * config) {
             printf("Got %d bytes from server \'%s\'\n", n_recv, buffer);
             // Close the connection with the server
             close(client);
-            return 1;
+            return 10;
         }
         // If the server is waiting for use to send it data then it will be in
         // the write_to array
@@ -88,7 +93,7 @@ int rpc_client(struct rpc_client_config * config) {
             send(client, msg, strlen(msg), 0);
             // Close the connection with the server
             close(client);
-            return 2;
+            return 20;
         }
 
 
