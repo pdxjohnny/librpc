@@ -3,7 +3,7 @@
 
 
 // Starts listening and calls handlers based on their applicability to the path
-int rpc_start_server(struct rpc_server_config * config) {
+int rpc_server_start(struct rpc_server_config * config) {
     int err;
     int server, client;
     struct sockaddr_in server_addr, client_addr;
@@ -11,7 +11,8 @@ int rpc_start_server(struct rpc_server_config * config) {
 
     server = socket(AF_INET, SOCK_STREAM, 0);
     if (server == -1) {
-        return ENOSOCK;
+        errno = ENOSOCK;
+        return -1;
     }
 
     int yes = 1;
@@ -33,7 +34,8 @@ int rpc_start_server(struct rpc_server_config * config) {
     // Bind the socket
     err = bind(server, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (err == -1) {
-        return ENOBIND;
+        errno = ENOBIND;
+        return -1;
     }
 
     // If we requested port 0 then whoever started the server probably wants to
@@ -41,7 +43,8 @@ int rpc_start_server(struct rpc_server_config * config) {
     server_addr_size = sizeof(server_addr);
     err = getsockname(server, (struct sockaddr *) &server_addr, &server_addr_size);
     if (err == -1) {
-        return EPORT;
+        errno = EPORT;
+        return -1;
     }
     // Set the port in the config
     uint16_t port;
@@ -59,7 +62,8 @@ int rpc_start_server(struct rpc_server_config * config) {
     // Listen for incoming connections
     err = listen(server, SOMAXCONN);
     if (err == -1) {
-        return ELISTEN;
+        errno = ELISTEN;
+        return -1;
     }
 
     // We are only conserned with reading from the stop pipe and the server
@@ -88,7 +92,8 @@ int rpc_start_server(struct rpc_server_config * config) {
 
         // Select will return -1 if it had an error
         if (err == -1) {
-            return ESELECT;
+            errno = ESELECT;
+            return -1;
         }
 
         // If the server socket is active then we need to accept the connection
@@ -98,7 +103,8 @@ int rpc_start_server(struct rpc_server_config * config) {
             client_addr_size = sizeof(client_addr);
             client = accept(server, (struct sockaddr *) &client_addr, &client_addr_size);
             if (client == -1) {
-                return EACCEPT;
+                errno = EACCEPT;
+                return -1;
             }
 
             // Send the client some information
@@ -116,23 +122,29 @@ int rpc_start_server(struct rpc_server_config * config) {
         if (FD_ISSET(config->comm[RPC_COMM_READ], &read_from)) {
             // Read and print the message
             char buffer[20];
+            // Initialize the buffer to NULL
+            memset(buffer, 0, 20);
             read(config->comm[RPC_COMM_READ], buffer, 20);
             printf("Got shutdown message \'%s\'\n", buffer);
             // Shutdown the server
             shutdown(server, SHUT_RDWR);
             close(server);
-            // Return 0 for all is well
-            return 0;
+            // Data was send so close the write end of the pipe
+            close(config->comm[RPC_COMM_WRITE]);
+            // Server is closed so we dont need the read end of the pipe anymore
+            close(config->comm[RPC_COMM_READ]);
+            // Exit 0 for all is well
+            exit(EXIT_SUCCESS);
         }
 
     }
 
     // We should never get to here
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 // Start the server in the background
-int rpc_start_server_background(struct rpc_server_config * config) {
+int rpc_server_start_background(struct rpc_server_config * config) {
     int err;
     char buffer[RPC_GET_PORT_BUFFER_SIZE];
 
@@ -141,7 +153,8 @@ int rpc_start_server_background(struct rpc_server_config * config) {
     int pipe_stop[2];
     err = pipe(pipe_stop);
     if (err == -1) {
-        return ECREATECOMM;
+        errno = ECREATECOMM;
+        return -1;
     }
 
     // Create a pipe so that the server can report its port to us
@@ -149,25 +162,35 @@ int rpc_start_server_background(struct rpc_server_config * config) {
     int pipe_port[2];
     err = pipe(pipe_port);
     if (err == -1) {
-        return ECREATECOMM;
+        errno = ECREATECOMM;
+        return -1;
     }
+
+    // New array for server comm
+    int server_comm[2];
 
     // Fork so that the server is running in the background
     switch (fork()) {
     case -1:
         // Error
-        return EBACKGROUND;
+        errno = EBACKGROUND;
+        return -1;
 
     case 0:
         // Clild
         // Set the comm ports so that the server can write to the port pipe and
-        // read from the close pipe
+        // read from the close pipe.
+        server_comm[RPC_COMM_READ] = pipe_stop[RPC_COMM_READ];
+        server_comm[RPC_COMM_WRITE] = pipe_port[RPC_COMM_WRITE];
+        config->comm = server_comm;
         // Start the server dont worry about capturing the exit because we have
         // no way to send it to the parent as of now
-        return rpc_start_server(config);
+        return rpc_server_start(config);
 
     default:
         // Parent
+        config->comm[RPC_COMM_WRITE] = pipe_stop[RPC_COMM_WRITE];
+        config->comm[RPC_COMM_READ] = pipe_port[RPC_COMM_READ];
         // Read the port from the pipe
         read(pipe_port[RPC_COMM_READ], buffer, RPC_GET_PORT_BUFFER_SIZE);
         // Set the client port to be what the server reports its port is
@@ -186,6 +209,8 @@ int rpc_server_stop(struct rpc_server_config * config) {
     write(config->comm[RPC_COMM_WRITE], stop_msg, strlen(stop_msg));
     // Data was send so close the write end of the pipe
     close(config->comm[RPC_COMM_WRITE]);
+    // Server is closed so we dont need the read end of the pipe anymore
+    close(config->comm[RPC_COMM_READ]);
     return EXIT_SUCCESS;
 }
 

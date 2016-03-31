@@ -11,6 +11,7 @@
  *  Needs stuct of data that will be sent to method
 */
 #include <stdint.h>
+#include <errno.h>
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
@@ -58,10 +59,10 @@ struct rpc_server_config {
 };
 
 // Start the server and listen for client requests
-int rpc_start_server(struct rpc_server_config *);
+int rpc_server_start(struct rpc_server_config *);
 
 // Start the server in the background
-int rpc_start_server_background(struct rpc_server_config * config);
+int rpc_server_start_background(struct rpc_server_config * config);
 
 // Stop the server gracefully
 int rpc_server_stop(struct rpc_server_config * config);

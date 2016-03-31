@@ -9,7 +9,8 @@ int rpc_client(struct rpc_client_config * config) {
 
     client = socket(AF_INET, SOCK_STREAM, 0);
     if (client == -1) {
-        return ENOSOCK;
+        errno = ENOSOCK;
+        return -1;
     }
 
     int yes = 1;
@@ -29,14 +30,16 @@ int rpc_client(struct rpc_client_config * config) {
     struct hostent * server_info;
     server_info = gethostbyname(config->addr);
     if (!server_info) {
-        return EADDR;
+        errno = EADDR;
+        return -1;
     }
     server_addr.sin_addr = *(struct in_addr *) server_info->h_addr;
 
     // Connect the client socket to the server
     err = connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (err == -1) {
-        return ENOCONNECT;
+        errno = ENOCONNECT;
+        return -1;
     }
 
     // We want to know when the server is trying to send us data (read_from)
@@ -68,7 +71,8 @@ int rpc_client(struct rpc_client_config * config) {
 
         // Select will return -1 if it had an error
         if (err == -1) {
-            return ESELECT;
+            errno = ESELECT;
+            return -1;
         }
 
         // If the server is trying to write data to us our client will be in
@@ -96,10 +100,9 @@ int rpc_client(struct rpc_client_config * config) {
             return 20;
         }
 
-
     }
 
     // We should never get to here
-    return 0;
+    return EXIT_SUCCESS;
 }
 
