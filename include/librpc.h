@@ -51,15 +51,36 @@ struct rpc_server_config {
     struct rpc_handler * handlers;
     // Used to stop the server gracefully. This is the file descriptor of
     // anything that can be feed to select. See man 3 pselect for details
-    int comm;
+    // It is an array which needs the first fd to be readable and the second to
+    // be writeable (a pipe works great)
+    int * comm;
 };
 
+// Start the server and listen for client requests
 int rpc_start_server(struct rpc_server_config *);
+
+// Client config
+struct rpc_client_config {
+    // The address of the server we are connecting to
+    char * addr;
+    // The port of the server we are connecting to
+    int port;
+    // The message to deliver
+    struct rpc_message * msg;
+};
+
+// Client connectes to the server and preforms requests
+int rpc_client(struct rpc_client_config * config);
+
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
 }
 #endif
+
+// Constants
+#define RPC_COMM_READ 0
+#define RPC_COMM_WRITE 1
 
 // Error codes
 // ENOSOCK could not create server socket
@@ -73,3 +94,8 @@ int rpc_start_server(struct rpc_server_config *);
 // ESELECT means that there was an error with select when trying to determin if
 // there is a new connection to accept
 #define ESELECT 5
+// ENOCONNECT means that the client could not connect to the server
+#define ENOCONNECT 6
+// EPORT is when the server trys to find out what port it is bound to but it
+// fails
+#define EPORT 7
