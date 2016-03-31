@@ -96,8 +96,8 @@ int rpc_client(struct rpc_client_config * config) {
         // the write_to array
         if (FD_ISSET(client, &write_to)) {
             // Send the server some information
-            // char msg[] = "Hello World";
-            // send(client, msg, strlen(msg), 0);
+            char msg[] = "Hello World";
+            send(client, msg, strlen(msg), 0);
             // Close the connection with the server
             close(client);
             return 20;

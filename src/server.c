@@ -214,9 +214,34 @@ int rpc_server_stop(struct rpc_server_config * config) {
 
 // Called on new client accept
 int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in client_addr, int client) {
+    // Message we are receiving
+    struct rpc_message msg;
+    rpc_message_init(&msg);
+    // Buffer to recv incoming data
+    char buffer[RPC_MESSAGE_BUFFER_SIZE];
+
+    // Read in the message that the client sent
+    int bytes_read = 0;
+    int bytes_read_last = 0;
+    do {
+        // Clear the buffer
+        memset(buffer, 0, sizeof(buffer));
+        // Read in the request
+        bytes_read_last = read(client, buffer, RPC_MESSAGE_BUFFER_SIZE);
+        bytes_read += bytes_read_last;
+        // Parse the request
+        rpc_message_parse(&msg, buffer, bytes_read_last);
+    } while (bytes_read_last != 0 && !msg.parse_complete);
+
+    // Mark the message as incomplete if we stoped reading before it was done
+    // being parsed
+    if (!msg.parse_complete) {
+        msg.incomplete = 1;
+    }
+
     // Send the client some information
-    char msg[] = "Hello World";
-    send(client, msg, strlen(msg), 0);
+    // char msg[] = "Hello World";
+    // send(client, msg, strlen(msg), 0);
 
     // Close the connection with the client
     close(client);

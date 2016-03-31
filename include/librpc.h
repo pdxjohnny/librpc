@@ -23,11 +23,32 @@ int rpc_test();
 
 // The message sent or received
 struct rpc_message {
+    // Length of the message
     unsigned int length;
+    // Length recieved
+    unsigned int length_recv;
+    // Boolean values
+    // Parse comepleted
+    char parse_complete;
+    // Parse was not comepleted
+    char incomplete;
+    // Headers
     char ** headers;
+    // Data passed
+    char ** data;
     char * body;
     char * raw;
 };
+
+// Initializes an rpc_message
+int rpc_message_init(struct rpc_message * msg);
+
+// Parse the message into the message struct, give it the buffer which contains
+// new data to be parsed and the number of bytes in the buffer
+int rpc_message_parse(struct rpc_message *, char *, int);
+
+// Free the message when we are done with it
+int rpc_message_free(struct rpc_message *);
 
 // Fills field with the data sent over the request
 // return code is 0 for error 1 for success
@@ -95,6 +116,8 @@ int rpc_client(struct rpc_client_config * config);
 #define RPC_COMM_WRITE 1
 // Port length shouldnt be longer than 12
 #define RPC_GET_PORT_BUFFER_SIZE 12
+// For reading in client messages
+#define RPC_MESSAGE_BUFFER_SIZE 100
 
 // Error codes
 // ENOSOCK could not create server socket
