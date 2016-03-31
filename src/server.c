@@ -46,11 +46,14 @@ int rpc_start_server(struct rpc_server_config * config) {
     // Set the port in the config
     uint16_t port;
     char port_string[12];
+    // Grab the port it will be in network byte order
     sprintf(port_string, "%d", server_addr.sin_port);
+    // Put that network byte order port into a int
     port = atoi(port_string);
+    // Now we can convert it back to host byte order
     port = ntohs(port);
+    // Send that port back to whatever started the server
     sprintf(port_string, "%d", port);
-    printf("Server port is %s\n", port_string);
     write(config->comm[RPC_COMM_WRITE], port_string, strlen(port_string));
 
     // Listen for incoming connections
