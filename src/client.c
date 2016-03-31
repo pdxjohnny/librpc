@@ -25,7 +25,7 @@ int rpc_client(struct rpc_client_config * config) {
 
     // Make the server address as requested by config
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = config->port;
+    server_addr.sin_port = htons(config->port);
     struct hostent * server_info;
     server_info = gethostbyname(config->addr);
     if (!server_info) {

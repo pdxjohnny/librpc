@@ -1,6 +1,7 @@
 #include "rpc.h"
 #include <librpc.h>
 
+
 // Starts listening and calls handlers based on their applicability to the path
 int rpc_start_server(struct rpc_server_config * config) {
     int err;
@@ -26,7 +27,7 @@ int rpc_start_server(struct rpc_server_config * config) {
 
     // Configure the server as specified in config
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = config->port;
+    server_addr.sin_port = htons(config->port);
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Bind the socket
@@ -43,8 +44,12 @@ int rpc_start_server(struct rpc_server_config * config) {
         return EPORT;
     }
     // Set the port in the config
+    uint16_t port;
     char port_string[12];
     sprintf(port_string, "%d", server_addr.sin_port);
+    port = atoi(port_string);
+    port = ntohs(port);
+    sprintf(port_string, "%d", port);
     printf("Server port is %s\n", port_string);
     write(config->comm[RPC_COMM_WRITE], port_string, strlen(port_string));
 
@@ -121,5 +126,63 @@ int rpc_start_server(struct rpc_server_config * config) {
 
     // We should never get to here
     return 0;
+}
+
+// Start the server in the background
+int rpc_start_server_background(struct rpc_server_config * config) {
+    int err;
+    char buffer[RPC_GET_PORT_BUFFER_SIZE];
+
+    // Create a pipe so we can tell the server when to stop running
+    // Read end of the pipe is index 0 write end is index 1
+    int pipe_stop[2];
+    err = pipe(pipe_stop);
+    if (err == -1) {
+        return ECREATECOMM;
+    }
+
+    // Create a pipe so that the server can report its port to us
+    // Read end of the pipe is index 0 write end is index 1
+    int pipe_port[2];
+    err = pipe(pipe_port);
+    if (err == -1) {
+        return ECREATECOMM;
+    }
+
+    // Fork so that the server is running in the background
+    switch (fork()) {
+    case -1:
+        // Error
+        return EBACKGROUND;
+
+    case 0:
+        // Clild
+        // Set the comm ports so that the server can write to the port pipe and
+        // read from the close pipe
+        // Start the server dont worry about capturing the exit because we have
+        // no way to send it to the parent as of now
+        return rpc_start_server(config);
+
+    default:
+        // Parent
+        // Read the port from the pipe
+        read(pipe_port[RPC_COMM_READ], buffer, RPC_GET_PORT_BUFFER_SIZE);
+        // Set the client port to be what the server reports its port is
+        // Convert the string to a port number
+        config->port = atoi(buffer);
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Stop the server gracefully by sending the stop command through the pipe
+int rpc_server_stop(struct rpc_server_config * config) {
+    // Send some data trough, the server will stop once we do
+    char stop_msg[] = "stop";
+    write(config->comm[RPC_COMM_WRITE], stop_msg, strlen(stop_msg));
+    // Data was send so close the write end of the pipe
+    close(config->comm[RPC_COMM_WRITE]);
+    return EXIT_SUCCESS;
 }
 

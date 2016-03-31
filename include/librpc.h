@@ -60,6 +60,12 @@ struct rpc_server_config {
 // Start the server and listen for client requests
 int rpc_start_server(struct rpc_server_config *);
 
+// Start the server in the background
+int rpc_start_server_background(struct rpc_server_config * config);
+
+// Stop the server gracefully
+int rpc_server_stop(struct rpc_server_config * config);
+
 // Client config
 struct rpc_client_config {
     // The address of the server we are connecting to
@@ -80,8 +86,11 @@ int rpc_client(struct rpc_client_config * config);
 #endif
 
 // Constants
+// Ends of a pipe
 #define RPC_COMM_READ 0
 #define RPC_COMM_WRITE 1
+// Port length shouldnt be longer than 12
+#define RPC_GET_PORT_BUFFER_SIZE 12
 
 // Error codes
 // ENOSOCK could not create server socket
@@ -102,3 +111,7 @@ int rpc_client(struct rpc_client_config * config);
 #define EPORT 7
 // EADDR is when the client cant look up the ip of the hostname given
 #define EADDR 8
+// EBACKGROUND means we could not fork/thread into the background
+#define EBACKGROUND 9
+// ECREATECOMM is when we cant establish a communitcation to the server process
+#define ECREATECOMM 10
