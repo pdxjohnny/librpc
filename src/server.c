@@ -106,13 +106,12 @@ int rpc_server_start(struct rpc_server_config * config) {
                 errno = EACCEPT;
                 return -1;
             }
-
-            // Send the client some information
-            char msg[] = "Hello World";
-            send(client, msg, strlen(msg), 0);
-
-            // Close the connection with the client
-            close(client);
+            // Handle the client
+            err = rpc_server_handle_client(config, client_addr, client);
+            if (client == -1) {
+                errno = EACCEPT;
+                return -1;
+            }
         }
 
         // If there is something to read from comm that means we should
@@ -210,6 +209,18 @@ int rpc_server_stop(struct rpc_server_config * config) {
     close(config->comm[RPC_COMM_WRITE]);
     // Server is closed so we dont need the read end of the pipe anymore
     close(config->comm[RPC_COMM_READ]);
+    return EXIT_SUCCESS;
+}
+
+// Called on new client accept
+int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in client_addr, int client) {
+    // Send the client some information
+    char msg[] = "Hello World";
+    send(client, msg, strlen(msg), 0);
+
+    // Close the connection with the client
+    close(client);
+
     return EXIT_SUCCESS;
 }
 

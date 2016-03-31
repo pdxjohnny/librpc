@@ -67,6 +67,9 @@ int rpc_server_start_background(struct rpc_server_config * config);
 // Stop the server gracefully
 int rpc_server_stop(struct rpc_server_config * config);
 
+// Handle incomming client connections
+int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in client_addr, int client);
+
 // Client config
 struct rpc_client_config {
     // The address of the server we are connecting to

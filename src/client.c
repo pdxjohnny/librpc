@@ -82,12 +82,12 @@ int rpc_client(struct rpc_client_config * config) {
         // the read_from array
         if (FD_ISSET(client, &read_from)) {
             // Read 100 bytes from the server
-            char buffer[100];
+            // char buffer[100];
             // Keep track of how many bytes we actually got from the server
-            int n_recv;
-            n_recv = read(client, buffer, 100);
+            // int n_recv;
+            // n_recv = read(client, buffer, 100);
             // Display the message (just for now)
-            printf("Got %d bytes from server \'%s\'\n", n_recv, buffer);
+            // printf("Got %d bytes from server \'%s\'\n", n_recv, buffer);
             // Close the connection with the server
             close(client);
             return 10;
@@ -96,8 +96,8 @@ int rpc_client(struct rpc_client_config * config) {
         // the write_to array
         if (FD_ISSET(client, &write_to)) {
             // Send the server some information
-            char msg[] = "Hello World";
-            send(client, msg, strlen(msg), 0);
+            // char msg[] = "Hello World";
+            // send(client, msg, strlen(msg), 0);
             // Close the connection with the server
             close(client);
             return 20;
