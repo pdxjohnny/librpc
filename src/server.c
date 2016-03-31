@@ -125,7 +125,6 @@ int rpc_server_start(struct rpc_server_config * config) {
             // Initialize the buffer to NULL
             memset(buffer, 0, 20);
             read(config->comm[RPC_COMM_READ], buffer, 20);
-            printf("Got shutdown message \'%s\'\n", buffer);
             // Shutdown the server
             shutdown(server, SHUT_RDWR);
             close(server);

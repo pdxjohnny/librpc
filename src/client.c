@@ -46,6 +46,7 @@ int rpc_client(struct rpc_client_config * config) {
     // and when the server is ready for us to write data to it (write_to)
     fd_set read_from;
     fd_set write_to;
+    fd_set err_sock;
 
     // Accept connections until we recv information from the pipe telling us to
     // do otherwise
@@ -53,10 +54,12 @@ int rpc_client(struct rpc_client_config * config) {
         // Get rid of the old sockets
         FD_ZERO(&read_from);
         FD_ZERO(&write_to);
+        FD_ZERO(&err_sock);
 
         // Check if our client can read from or write to the server
         FD_SET(client, &read_from);
         FD_SET(client, &write_to);
+        FD_SET(client, &err_sock);
 
         // Find the max file descriptor that we will be reading from
         // As of know we only have the one for client
@@ -67,7 +70,7 @@ int rpc_client(struct rpc_client_config * config) {
         // acted on that number id -1 if there was an error
         // last argument is zero because there is no need for a timeout just
         // wait indefinatly, this is all we care about we need a response
-        err = select(max_fd, &read_from, &write_to, NULL, 0);
+        err = select(max_fd, &read_from, &write_to, &err_sock, 0);
 
         // Select will return -1 if it had an error
         if (err == -1) {
@@ -98,6 +101,15 @@ int rpc_client(struct rpc_client_config * config) {
             // Close the connection with the server
             close(client);
             return 20;
+        }
+        // If we are in the error state then we haave probably been
+        // disconnected from the server
+        if (FD_ISSET(client, &err_sock)) {
+            // Close the connection with the server
+            close(client);
+            // Let the caller know there was an error
+            errno = ENOTCONN;
+            return -1;
         }
 
     }
