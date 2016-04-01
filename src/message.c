@@ -64,7 +64,14 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
     if (err == -1) {
         return -1;
     }
-    printf("path \'%s\'\n", path);
+
+    // For our purposess the path is what we call the method
+    msg->method = rpc_string_on_heap(path, buffer_size + 1);
+    // Make sure that memory allocation was a success
+    if (msg->method == NULL) {
+        return -1;
+    }
+    printf("msg->method \'%s\'\n", msg->method);
 
     return EXIT_SUCCESS;
 }

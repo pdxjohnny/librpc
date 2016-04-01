@@ -115,7 +115,9 @@ int rpc_client(struct rpc_client_config * config);
 //  Used for string minipulation
 //
 // Grab from start to character delim from src and put it in dest
-int rpc_string_untildelim(char * dest, char * src, int dest_size, char split_on);
+int rpc_string_untildelim(char * dest, char * src, int dest_size, char delim);
+// Allocate a string on the heap an copy something into it
+char * rpc_string_on_heap(char * src, size_t max);
 
 
 // So that cpp can link to this lib
