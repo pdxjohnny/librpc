@@ -54,7 +54,10 @@ int rpc_message_parse(struct rpc_message *, char *, int);
 // Pick the correct parser based on msg->protocol
 int rpc_message_parse_protocol(struct rpc_message * msg, char * buffer, int buffer_size);
 // Methods to parse for various protocols
+// HTTP
 int rpc_message_parse_http(struct rpc_message *, char *, int);
+int rpc_message_parse_http_headers(struct rpc_message * msg, char * buffer, int buffer_size);
+int rpc_message_parse_http_body(struct rpc_message * msg, char * buffer, int buffer_size);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);

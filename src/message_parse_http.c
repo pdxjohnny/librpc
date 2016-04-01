@@ -35,3 +35,13 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
     return EXIT_SUCCESS;
 }
 
+// Prase the headers
+int rpc_message_parse_http_headers(struct rpc_message * msg, char * buffer, int buffer_size) {
+    return EXIT_SUCCESS;
+}
+
+// Parse the body for data
+int rpc_message_parse_http_body(struct rpc_message * msg, char * buffer, int buffer_size) {
+    return EXIT_SUCCESS;
+}
+
