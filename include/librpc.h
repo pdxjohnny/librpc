@@ -32,6 +32,8 @@ struct rpc_message {
     char parse_complete;
     // Parse was not comepleted
     char incomplete;
+    // The method to call
+    char * method;
     // Headers
     char ** headers;
     // Data passed
@@ -46,6 +48,8 @@ int rpc_message_init(struct rpc_message * msg);
 // Parse the message into the message struct, give it the buffer which contains
 // new data to be parsed and the number of bytes in the buffer
 int rpc_message_parse(struct rpc_message *, char *, int);
+// Methods to parse for various protocols
+int rpc_message_parse_http(struct rpc_message *, char *, int);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);
@@ -59,8 +63,11 @@ int rpc_char_field(char *);
 
 // Server handler
 struct rpc_handler {
-    char * URL;
-    int (*handler)(struct rpc_message *);
+    // This is the method that you want this handler to repsond to
+    char * method;
+    // Handlers should accpet the client file descriptor and the message sent
+    // by the client
+    int (*handler)(int, struct rpc_message *);
 };
 
 // Server config
@@ -117,7 +124,7 @@ int rpc_client(struct rpc_client_config * config);
 // Port length shouldnt be longer than 12
 #define RPC_GET_PORT_BUFFER_SIZE 12
 // For reading in client messages
-#define RPC_MESSAGE_BUFFER_SIZE 100
+#define RPC_MESSAGE_BUFFER_SIZE 1024
 
 // Error codes
 // ENOSOCK could not create server socket
