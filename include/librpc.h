@@ -72,7 +72,7 @@ struct rpc_handler {
     char * method;
     // Handlers should accpet the client file descriptor and the message sent
     // by the client
-    int (*handler)(int, struct rpc_message *);
+    int (*func)(int, struct rpc_message *);
 };
 
 // Server config
@@ -84,6 +84,9 @@ struct rpc_server_config {
     uint16_t port;
     // The NULL terminated array of handlers for each path
     struct rpc_handler * handlers;
+    // The handler to call if no handlers are found that match the requested
+    // method
+    int (*not_found)(int, struct rpc_message *);
     // Used to stop the server gracefully. This is the file descriptor of
     // anything that can be feed to select. See man 3 pselect for details
     // It is an array which needs the first fd to be readable and the second to
@@ -95,13 +98,16 @@ struct rpc_server_config {
 int rpc_server_start(struct rpc_server_config *);
 
 // Start the server in the background
-int rpc_server_start_background(struct rpc_server_config * config);
+int rpc_server_start_background(struct rpc_server_config *);
 
 // Stop the server gracefully
-int rpc_server_stop(struct rpc_server_config * config);
+int rpc_server_stop(struct rpc_server_config *);
 
 // Handle incomming client connections
-int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in client_addr, int client);
+int rpc_server_handle_client(struct rpc_server_config *, struct sockaddr_in *, int);
+
+// Pick the correct handler to reply to the client
+int rpc_server_reply_client(struct rpc_server_config *, struct sockaddr_in *, int, struct rpc_message *);
 
 // Client config
 struct rpc_client_config {

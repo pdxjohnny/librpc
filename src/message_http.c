@@ -30,6 +30,7 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
         return -1;
     }
     printf("msg->method \'%s\'\n", msg->method);
+    msg->parse_complete = 1;
 
     return EXIT_SUCCESS;
 }

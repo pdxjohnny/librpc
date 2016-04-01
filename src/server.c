@@ -108,7 +108,7 @@ int rpc_server_start(struct rpc_server_config * config) {
                 return -1;
             }
             // Handle the client
-            err = rpc_server_handle_client(config, client_addr, client);
+            err = rpc_server_handle_client(config, &client_addr, client);
             if (client == -1) {
                 errno = EACCEPT;
                 return -1;
@@ -215,7 +215,7 @@ int rpc_server_stop(struct rpc_server_config * config) {
 }
 
 // Called on new client accept
-int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in client_addr, int client) {
+int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, int client) {
     // Message we are receiving
     struct rpc_message msg;
     rpc_message_init(&msg);
@@ -231,9 +231,14 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
         // Read in the request
         bytes_read_last = read(client, buffer, RPC_MESSAGE_BUFFER_SIZE);
         bytes_read += bytes_read_last;
+        // Dont parse if there was no new data
+        if (bytes_read_last < 1) {
+            break;
+        }
         // Parse the request
         rpc_message_parse(&msg, buffer, bytes_read_last);
-    } while (bytes_read_last != 0 && !msg.parse_complete);
+        // Done parsing
+    } while (!msg.parse_complete);
 
     // Mark the message as incomplete if we stoped reading before it was done
     // being parsed
@@ -241,6 +246,8 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
         msg.incomplete = 1;
     }
 
+    // Call whatever handler is appropriate
+    rpc_server_reply_client(config, client_addr, client, &msg);
     // Send the client some information
     // char msg[] = "Hello World";
     // send(client, msg, strlen(msg), 0);
@@ -252,5 +259,27 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     close(client);
 
     return EXIT_SUCCESS;
+}
+
+// Pick the correct method to use in our reply to the client
+int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, int client, struct rpc_message * msg) {
+    // Make sure there are some handlers to check
+    struct rpc_handler * handler;
+    if (config->handlers == NULL && config->not_found == NULL) {
+        // Couldnt find that method
+        errno = ENOSYS;
+        return -1;
+    }
+
+    // Look thoguh all of the handlers and choose the appropriate one to call
+    // and return
+    for (handler = config->handlers; handler != NULL; ++handler) {
+        if (0 == strncmp(msg->method, handler->method, strlen(handler->method))) {
+            return handler->func(client, msg);
+        }
+    }
+
+    // Couldnt find that method so call the not_found handler
+    return config->not_found(client, msg);
 }
 
