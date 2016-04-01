@@ -22,28 +22,17 @@ int rpc_message_init(struct rpc_message * msg) {
 
 // Parse the mesage
 int rpc_message_parse(struct rpc_message * msg, char * buffer, int buffer_size) {
-    char * first_newline = NULL;
-    // Check the first line of the message
-    first_newline = strchr(buffer, '\n');
-    // first_newline will be NULL if it couldnt find a newline in the buffer
-    if (first_newline == NULL) {
-        errno = EBADMSG;
-        return -1;
-    }
-    // Find out how many characters in between the begining and the newline
-    uintptr_t first_line_length = first_newline - buffer;
-    // That number should never be longer than the size of the whole buffer
-    printf("first line is %ld long\n", first_line_length);
-    if (first_line_length > buffer_size) {
-        errno = ERANGE;
-        return -1;
-    }
+    int err;
+
     // Make a string to hold the first line + the null terminating character
-    char first_line[first_line_length + 1];
-    // Copy the first line fromt he buffer into its own string
-    memcpy(first_line, buffer, first_line_length);
-    // NULL terminate the first line string
-    first_line[first_line_length + 1] = '\0';
+    // It needs to be at least as long as buffer_size in case there is no
+    // newline on purpose
+    char first_line[buffer_size + 1];
+    // Grab the first string until the newline
+    err = rpc_string_untildelim(first_line, buffer, buffer_size + 1, '\n');
+    if (err == -1) {
+        return -1;
+    }
 
     // Go though all the protocols that we know how to parse and parse the
     // message if that protocol type is present in the first line

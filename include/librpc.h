@@ -111,6 +111,12 @@ struct rpc_client_config {
 // Client connectes to the server and preforms requests
 int rpc_client(struct rpc_client_config * config);
 
+// String functions
+//  Used for string minipulation
+//
+// Grab from start to character delim from src and put it in dest
+int rpc_string_untildelim(char * dest, char * src, int dest_size, char split_on);
+
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
