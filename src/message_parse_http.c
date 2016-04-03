@@ -19,13 +19,20 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
         return EXIT_SUCCESS;
     }
 
-    // We have all the headers but we might have gotten some of the body. So
-    // lets make a pipe and feed all of the body that we got into the pipe.
-    // That way the handler function reads directly from the body in case it
-    // needs to read in a large amount of data without putting it in memory
-    uintptr_t start_of_message = (uintptr_t)msg->buffer;
-    int length_of_headers = (uintptr_t)strstr(msg->buffer, "\r\n\r\n") - 4 + start_of_message;
-    if (msg->length_recv > length_of_headers) {
+    // The buffer contains the headers so make headers equal to buffer
+    msg->headers = msg->buffer;
+    msg->length_headers = (uintptr_t)strstr(msg->headers, "\r\n\r\n") +
+        (uintptr_t)4;
+    msg->length_headers = MIN(msg->length_headers - (uintptr_t)msg->headers,
+        (uintptr_t)msg->headers - msg->length_headers);
+    msg->buffer = NULL;
+
+    // We have all the headers so the buffer now needs to point to the end of
+    // the headers
+    if (msg->length_recv > msg->length_headers) {
+        printf("More buffer than just headers\n");
+        printf("%03d   %03d\n", msg->length_recv, msg->length_headers);
+        msg->buffer = strstr(msg->headers, "\r\n\r\n") + (uintptr_t)4;
         // Create a pipe that will be the same as reading from the socket only we
         // are going to write the part of the body which we accidentaly capured
         // into it first
@@ -53,11 +60,11 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     int err;
 
     // Make a string to hold the path
-    char path[msg->length_recv + 1];
+    char path[msg->length_headers + 1];
     memset(path, 0, sizeof(path));
     // The path will be right after the HTTP method (GET, POST, HEAD) so we
     // have to find out where the http method ends and the path begins
-    char * path_start = strchr(msg->buffer, ' ') + 2;
+    char * path_start = strchr(msg->headers, ' ') + 2;
     // path_start will be NULL if it couldnt find a space in msg->buffer
     if (path_start == NULL) {
         errno = EBADMSG;
@@ -65,13 +72,13 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     }
 
     // Grab the path so from after the method to the next space before HTTP/X.X
-    err = rpc_string_untildelim(path, path_start, msg->length_recv + 1, ' ');
+    err = rpc_string_untildelim(path, path_start, msg->length_headers + 1, ' ');
     if (err == -1) {
         return -1;
     }
 
     // For our purposess the path is what we call the method
-    msg->method = rpc_string_on_heap(path, msg->length_recv + 1);
+    msg->method = rpc_string_on_heap(path, msg->length_headers + 1);
     // Make sure that memory allocation was a success
     if (msg->method == NULL) {
         return -1;
@@ -79,8 +86,29 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     return EXIT_SUCCESS;
 }
 
-// Prase the headers
-int rpc_message_parse_http_headers(struct rpc_message * msg) {
+// Find a header
+int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, char * store) {
+    int err;
+
+    // Check if the header is present ebfore trying to find it
+    store = strstr(msg->headers, find);
+    if (store == NULL) {
+        errno = ENOMSG;
+        return -1;
+    }
+
+    // Go the the delim between the header and its value
+    store = strchr(store, ':');
+    if (store == NULL) {
+        errno = ENOMSG;
+        return -1;
+    }
+
+    // Grab the value of the header
+    err = rpc_string_untildelim(store, store, msg->length_headers, '\r');
+    if (err == -1) {
+        return -1;
+    }
     return EXIT_SUCCESS;
 }
 

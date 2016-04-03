@@ -9,6 +9,7 @@ int rpc_test () {
 int rpc_message_init(struct rpc_message * msg) {
     msg->length = 0;
     msg->length_recv = 0;
+    msg->length_headers = 0;
     msg->recv_count = 0;
     msg->client = 0;
     msg->parse_complete = 0;
@@ -70,6 +71,10 @@ int rpc_message_free(struct rpc_message * msg) {
     if (msg->buffer != NULL) {
         free(msg->buffer);
         msg->buffer = NULL;
+    }
+    if (msg->headers != NULL) {
+        free(msg->headers);
+        msg->headers = NULL;
     }
     return EXIT_SUCCESS;
 }

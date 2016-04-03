@@ -26,6 +26,8 @@ struct rpc_message {
     unsigned int length;
     // Length recieved
     unsigned int length_recv;
+    // Length of the headers
+    unsigned int length_headers;
     // The number of times we have received new data
     int recv_count;
     // The client that we are reading from
@@ -41,9 +43,9 @@ struct rpc_message {
     // The method to call
     char * method;
     // Headers
-    char ** headers;
-    // Data passed
-    char ** data;
+    char * headers;
+    // Data paressed
+    char * data;
     char * buffer;
 };
 
