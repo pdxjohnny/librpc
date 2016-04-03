@@ -219,18 +219,17 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     // Message we are receiving
     struct rpc_message msg;
     rpc_message_init(&msg);
+    msg.client = client;
     // Buffer to recv incoming data
     char buffer[RPC_MESSAGE_BUFFER_SIZE];
 
     // Read in the message that the client sent
-    int bytes_read = 0;
     int bytes_read_last = 0;
     do {
         // Clear the buffer
         memset(buffer, 0, sizeof(buffer));
         // Read in the request
         bytes_read_last = read(client, buffer, RPC_MESSAGE_BUFFER_SIZE);
-        bytes_read += bytes_read_last;
         // Dont parse if there was no new data
         if (bytes_read_last < 1) {
             break;

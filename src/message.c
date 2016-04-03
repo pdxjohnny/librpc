@@ -9,14 +9,15 @@ int rpc_test () {
 int rpc_message_init(struct rpc_message * msg) {
     msg->length = 0;
     msg->length_recv = 0;
+    msg->recv_count = 0;
+    msg->client = 0;
     msg->parse_complete = 0;
     msg->incomplete = 0;
     msg->protocol = RPC_PROTOCOL_UNKNOWN;
     msg->method = NULL;
     msg->headers = NULL;
     msg->data = NULL;
-    msg->body = NULL;
-    msg->raw = NULL;
+    msg->buffer = NULL;
 
     return EXIT_SUCCESS;
 }
@@ -66,6 +67,45 @@ int rpc_message_free(struct rpc_message * msg) {
         free(msg->method);
         msg->method = NULL;
     }
+    if (msg->buffer != NULL) {
+        free(msg->buffer);
+        msg->buffer = NULL;
+    }
+    return EXIT_SUCCESS;
+}
+
+// Append data in buffer to data previously recived stored in the messages
+// buffer
+int rpc_message_append_to_buffer(struct rpc_message * msg, char * buffer, int buffer_size) {
+    // If this is the first time appending data to the messages buffer then
+    // we need to allocate a buffer for the message and place this initial data
+    // in it rather than copying existing data nd new data into a new buffer
+    if (msg->buffer == NULL) {
+        printf("Creating initial buffer\n");
+        // Allocate the messages initial buffer
+        msg->buffer = rpc_string_on_heap(buffer, buffer_size);
+        // We have appended the new data to the buffer
+        msg->length_recv = buffer_size;
+        printf("Malloc initial message buffer %d\n", msg->length_recv);
+    } else {
+        // If we are recving more data and this is not the first time then we
+        // need to append to the buffer
+        char new_buffer[msg->length_recv + buffer_size];
+        memset(new_buffer, 0, sizeof(new_buffer));
+        // Copy the old buffer into the new buffer
+        strncpy(new_buffer, msg->buffer, msg->length_recv);
+        // Free the old buffer now that we have copied it into the new one
+        printf("Free message buffer %d\n", msg->length_recv);
+        free(msg->buffer);
+        // Copy the current buffer into the new buffer
+        strncpy(new_buffer + (uintptr_t)msg->length_recv, buffer, buffer_size);
+        // Allocate the new buffer on the heap
+        msg->buffer = rpc_string_on_heap(new_buffer, msg->length_recv + buffer_size);
+        // We have appended the new data to the buffer
+        msg->length_recv += buffer_size;
+        printf("Malloc message buffer %d\n", msg->length_recv);
+    }
+
     return EXIT_SUCCESS;
 }
 

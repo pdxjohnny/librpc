@@ -11,7 +11,6 @@
  *  Needs stuct of data that will be sent to method
 */
 #include <stdint.h>
-#include <errno.h>
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
@@ -27,6 +26,10 @@ struct rpc_message {
     unsigned int length;
     // Length recieved
     unsigned int length_recv;
+    // The number of times we have received new data
+    int recv_count;
+    // The client that we are reading from
+    int client;
     // Boolean values
     // Parse comepleted
     char parse_complete;
@@ -41,8 +44,7 @@ struct rpc_message {
     char ** headers;
     // Data passed
     char ** data;
-    char * body;
-    char * raw;
+    char * buffer;
 };
 
 // Initializes an rpc_message
@@ -52,12 +54,18 @@ int rpc_message_init(struct rpc_message * msg);
 // new data to be parsed and the number of bytes in the buffer
 int rpc_message_parse(struct rpc_message *, char *, int);
 // Pick the correct parser based on msg->protocol
-int rpc_message_parse_protocol(struct rpc_message * msg, char * buffer, int buffer_size);
+int rpc_message_parse_protocol(struct rpc_message *, char *, int);
+// Append new data to the messages interal buffer
+int rpc_message_append_to_buffer(struct rpc_message *, char *, int);
+// Parse various kinds of messages
+int rpc_message_parse_urlencoded(struct rpc_message *, char *, int);
+int rpc_message_parse_json(struct rpc_message *, char *, int);
 // Methods to parse for various protocols
 // HTTP
 int rpc_message_parse_http(struct rpc_message *, char *, int);
-int rpc_message_parse_http_headers(struct rpc_message * msg, char * buffer, int buffer_size);
-int rpc_message_parse_http_body(struct rpc_message * msg, char * buffer, int buffer_size);
+int rpc_message_parse_http_path(struct rpc_message *);
+int rpc_message_parse_http_headers(struct rpc_message *);
+int rpc_message_parse_http_body(struct rpc_message *);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);

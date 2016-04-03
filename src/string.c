@@ -40,7 +40,7 @@ char * rpc_string_on_heap(char * src, size_t max) {
     size_t length = strnlen(src, max - 1) + 1;
 
     // Allocate the string on the heap
-    char * heap_string = malloc(length);
+    char * heap_string = (char *)malloc(length * sizeof(char));
     // If memory could not be allocated return NULL
     if (heap_string == NULL) {
         return NULL;
