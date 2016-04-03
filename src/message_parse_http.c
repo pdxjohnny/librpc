@@ -6,8 +6,6 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
     int err;
     int parse_complete = 1;
 
-    printf("Parsing message %d\n", msg->recv_count);
-
     // Append the new data to the messages buffer until we have recived all the
     // headers
     rpc_message_append_to_buffer(msg, buffer, buffer_size);
@@ -15,18 +13,11 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
     // We have received and append to the buffer
     ++msg->recv_count;
 
-    printf("Looking for header delim, msg->buffer = %x\n", msg->buffer);
-    int i;
-    for (i = 0; i < msg->length_recv; ++i) {
-        // printf("msg->buffer[%03d] = %04x\n", i, msg->buffer[i]);
-    }
-
     // Make sure that we have at least all of the headers before we start
     // parsing the path and headers
     if (strstr(msg->buffer, "\r\n\r\n") == NULL) {
         return EXIT_SUCCESS;
     }
-    printf("Found header delim\n");
 
     // We have all the headers but we might have gotten some of the body. So
     // lets make a pipe and feed all of the body that we got into the pipe.
@@ -85,7 +76,6 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     if (msg->method == NULL) {
         return -1;
     }
-    printf("msg->method \'%s\'\n", msg->method);
     return EXIT_SUCCESS;
 }
 
