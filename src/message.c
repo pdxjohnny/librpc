@@ -86,22 +86,22 @@ int rpc_message_append_to_buffer(struct rpc_message * msg, char * buffer, int bu
     // in it rather than copying existing data nd new data into a new buffer
     if (msg->buffer == NULL) {
         // Allocate the messages initial buffer
-        msg->buffer = rpc_string_on_heap(buffer, buffer_size);
+        msg->buffer = rpc_string_on_heap(buffer, buffer_size + 1);
         // We have appended the new data to the buffer
         msg->length_recv = buffer_size;
     } else {
         // If we are recving more data and this is not the first time then we
         // need to append to the buffer
-        char new_buffer[msg->length_recv + buffer_size];
+        char new_buffer[msg->length_recv + buffer_size + 1];
         memset(new_buffer, 0, sizeof(new_buffer));
         // Copy the old buffer into the new buffer
         strncpy(new_buffer, msg->buffer, msg->length_recv);
         // Free the old buffer now that we have copied it into the new one
         free(msg->buffer);
         // Copy the current buffer into the new buffer
-        strncpy(new_buffer + (uintptr_t)msg->length_recv, buffer, buffer_size);
+        strncpy(new_buffer + (uintptr_t)msg->length_recv, buffer, buffer_size + 1);
         // Allocate the new buffer on the heap
-        msg->buffer = rpc_string_on_heap(new_buffer, msg->length_recv + buffer_size);
+        msg->buffer = rpc_string_on_heap(new_buffer, msg->length_recv + buffer_size + 1);
         // We have appended the new data to the buffer
         msg->length_recv += buffer_size;
     }
