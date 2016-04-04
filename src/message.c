@@ -10,7 +10,6 @@ int rpc_message_init(struct rpc_message * msg) {
     msg->length = 0;
     msg->length_recv = 0;
     msg->length_headers = 0;
-    msg->recv_count = 0;
     msg->client = 0;
     msg->parse_complete = 0;
     msg->incomplete = 0;

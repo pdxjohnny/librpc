@@ -10,9 +10,6 @@ int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_s
     // headers
     rpc_message_append_to_buffer(msg, buffer, buffer_size);
 
-    // We have received and append to the buffer
-    ++msg->recv_count;
-
     // Make sure that we have at least all of the headers before we start
     // parsing the path and headers
     if (strstr(msg->buffer, "\r\n\r\n") == NULL) {

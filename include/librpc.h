@@ -28,8 +28,6 @@ struct rpc_message {
     unsigned int length_recv;
     // Length of the headers
     unsigned int length_headers;
-    // The number of times we have received new data
-    int recv_count;
     // The client that we are reading from
     int client;
     // Boolean values
