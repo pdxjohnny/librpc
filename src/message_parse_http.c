@@ -56,6 +56,12 @@ int rpc_message_parse_http(struct rpc_message * msg, const char * buffer, int bu
 int rpc_message_parse_http_path(struct rpc_message * msg) {
     int err;
 
+    // Make sure there are headers
+    if (msg->headers == NULL || msg->length_headers == 0) {
+        errno = ENOMSG;
+        return -1;
+    }
+
     // Make a string to hold the path
     char path[msg->length_headers + 1];
     memset(path, 0, sizeof(path));
@@ -87,17 +93,23 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
 int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, char * store) {
     int err;
 
+    // Make sure there are headers
+    if (msg->headers == NULL || msg->length_headers == 0) {
+        errno = ENOMSG;
+        return -1;
+    }
+
     // Check if the header is present ebfore trying to find it
     store = strstr(msg->headers, find);
     if (store == NULL) {
-        errno = ENOMSG;
+        errno = ENOMEDIUM;
         return -1;
     }
 
     // Go the the delim between the header and its value
     store = strchr(store, ':');
     if (store == NULL) {
-        errno = ENOMSG;
+        errno = EBADMSG;
         return -1;
     }
 
