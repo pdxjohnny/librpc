@@ -23,7 +23,7 @@ int rpc_message_init(struct rpc_message * msg) {
 }
 
 // Parse the mesage
-int rpc_message_parse(struct rpc_message * msg, char * buffer, int buffer_size) {
+int rpc_message_parse(struct rpc_message * msg, const char * buffer, int buffer_size) {
     int err;
 
     // Check if we already know what kind of message this is
@@ -36,7 +36,7 @@ int rpc_message_parse(struct rpc_message * msg, char * buffer, int buffer_size) 
     // newline on purpose
     char first_line[buffer_size + 1];
     // Grab the first string until the newline
-    err = rpc_string_untildelim(first_line, buffer, buffer_size + 1, '\n');
+    err = rpc_string_untildelim(buffer, first_line, buffer_size + 1, '\n');
     if (err == -1) {
         return -1;
     }
@@ -51,7 +51,7 @@ int rpc_message_parse(struct rpc_message * msg, char * buffer, int buffer_size) 
 }
 
 // Pick the correct parser for the message
-int rpc_message_parse_protocol(struct rpc_message * msg, char * buffer, int buffer_size) {
+int rpc_message_parse_protocol(struct rpc_message * msg, const char * buffer, int buffer_size) {
     switch (msg->protocol) {
     case RPC_PROTOCOL_HTTP:
         return rpc_message_parse_http(msg, buffer, buffer_size);
@@ -80,7 +80,7 @@ int rpc_message_free(struct rpc_message * msg) {
 
 // Append data in buffer to data previously recived stored in the messages
 // buffer
-int rpc_message_append_to_buffer(struct rpc_message * msg, char * buffer, int buffer_size) {
+int rpc_message_append_to_buffer(struct rpc_message * msg, const char * buffer, int buffer_size) {
     // If this is the first time appending data to the messages buffer then
     // we need to allocate a buffer for the message and place this initial data
     // in it rather than copying existing data nd new data into a new buffer

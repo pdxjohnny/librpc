@@ -52,17 +52,17 @@ int rpc_message_init(struct rpc_message * msg);
 
 // Parse the message into the message struct, give it the buffer which contains
 // new data to be parsed and the number of bytes in the buffer
-int rpc_message_parse(struct rpc_message *, char *, int);
+int rpc_message_parse(struct rpc_message *, const char *, int);
 // Pick the correct parser based on msg->protocol
-int rpc_message_parse_protocol(struct rpc_message *, char *, int);
+int rpc_message_parse_protocol(struct rpc_message *, const char *, int);
 // Append new data to the messages interal buffer
-int rpc_message_append_to_buffer(struct rpc_message *, char *, int);
+int rpc_message_append_to_buffer(struct rpc_message *, const char *, int);
 // Parse various kinds of messages
-int rpc_message_parse_urlencoded(struct rpc_message *, char *, int);
-int rpc_message_parse_json(struct rpc_message *, char *, int);
+int rpc_message_parse_urlencoded(struct rpc_message *, const char *, int);
+int rpc_message_parse_json(struct rpc_message *, const char *, int);
 // Methods to parse for various protocols
 // HTTP
-int rpc_message_parse_http(struct rpc_message *, char *, int);
+int rpc_message_parse_http(struct rpc_message *, const char *, int);
 int rpc_message_parse_http_path(struct rpc_message *);
 int rpc_message_parse_http_headers(struct rpc_message *);
 int rpc_message_parse_http_body(struct rpc_message *);
@@ -137,9 +137,9 @@ int rpc_client(struct rpc_client_config * config);
 //  Used for string minipulation
 //
 // Grab from start to character delim from src and put it in dest
-int rpc_string_untildelim(char * dest, char * src, int dest_size, char delim);
+int rpc_string_untildelim(const char * src, char * dest, int dest_size, char delim);
 // Allocate a string on the heap an copy something into it
-char * rpc_string_on_heap(char * src, size_t max);
+char * rpc_string_on_heap(const char * src, size_t max);
 
 
 // So that cpp can link to this lib

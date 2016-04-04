@@ -2,7 +2,7 @@
 #include <librpc.h>
 
 // Parse an http mesage
-int rpc_message_parse_http(struct rpc_message * msg, char * buffer, int buffer_size) {
+int rpc_message_parse_http(struct rpc_message * msg, const char * buffer, int buffer_size) {
     int err;
     int parse_complete = 1;
 
@@ -69,7 +69,7 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     }
 
     // Grab the path so from after the method to the next space before HTTP/X.X
-    err = rpc_string_untildelim(path, path_start, msg->length_headers + 1, ' ');
+    err = rpc_string_untildelim(path_start, path, msg->length_headers + 1, ' ');
     if (err == -1) {
         return -1;
     }

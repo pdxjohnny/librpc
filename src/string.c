@@ -2,7 +2,7 @@
 #include <librpc.h>
 
 // Fills first with the first section of src, segment is up to delim
-int rpc_string_untildelim(char * dest, char * src, int dest_size, char delim) {
+int rpc_string_untildelim(const char * src, char * dest, int dest_size, char delim) {
     // Pointer the the first delim in src
     char * first_delim = NULL;
     // Check the first segment of the message
@@ -13,7 +13,7 @@ int rpc_string_untildelim(char * dest, char * src, int dest_size, char delim) {
         return -1;
     }
     // Find out how many characters in between the begining and the delim
-    uintptr_t first_segment_length = first_delim - src;
+    uintptr_t first_segment_length = MAX(first_delim - src, src - first_delim);
     // We only have a dest of dest_size and we have to NULL terminate dest so
     // it can only by dest_size - 1 long
     if (first_segment_length > (dest_size - 1)) {
@@ -31,7 +31,7 @@ int rpc_string_untildelim(char * dest, char * src, int dest_size, char delim) {
 // Take a NULL terminated string allocated on the stack and allocate the amount
 // needed to hold the string on the heap and copy it over to the heap. But
 // never allocate more than max
-char * rpc_string_on_heap(char * src, size_t max) {
+char * rpc_string_on_heap(const char * src, size_t max) {
     // The length of the string to be allocated
     // Add one so that we have room for the NULL terminator
     // Subtract one from max because we have to add one on the case that it
