@@ -64,7 +64,7 @@ int rpc_message_parse_json(struct rpc_message *, const char *, int);
 // HTTP
 int rpc_message_parse_http(struct rpc_message *, const char *, int);
 int rpc_message_parse_http_path(struct rpc_message *);
-int rpc_message_parse_http_headers(struct rpc_message *);
+int rpc_message_parse_http_header(struct rpc_message *, const char *, char *, int);
 int rpc_message_parse_http_body(struct rpc_message *);
 
 // Free the message when we are done with it

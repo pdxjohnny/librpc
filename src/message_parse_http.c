@@ -90,8 +90,9 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
 }
 
 // Find a header
-int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, char * store) {
+int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, char * store, int store_max) {
     int err;
+    char * header = NULL;
 
     // Make sure there are headers
     if (msg->headers == NULL || msg->length_headers == 0) {
@@ -100,21 +101,21 @@ int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, c
     }
 
     // Check if the header is present ebfore trying to find it
-    store = strstr(msg->headers, find);
-    if (store == NULL) {
+    header = strstr(msg->headers, find);
+    if (header == NULL) {
         errno = ENOMEDIUM;
         return -1;
     }
 
     // Go the the delim between the header and its value
-    store = strchr(store, ':');
-    if (store == NULL) {
+    header = strchr(header, ':') + (uintptr_t)2;
+    if (header == NULL) {
         errno = EBADMSG;
         return -1;
     }
 
     // Grab the value of the header
-    err = rpc_string_untildelim(store, store, msg->length_headers, '\r');
+    err = rpc_string_untildelim(header, store, store_max, '\r');
     if (err == -1) {
         return -1;
     }
