@@ -72,6 +72,7 @@ int rpc_message_parse_http(struct rpc_message *, const char *, int);
 int rpc_message_parse_http_path(struct rpc_message *);
 int rpc_message_parse_http_header(struct rpc_message *, const char *, char *, int);
 int rpc_message_parse_http_data(struct rpc_message *, const char *, char *, int);
+int rpc_message_parse_http_data_path(struct rpc_message *, const char *, char *, int);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);

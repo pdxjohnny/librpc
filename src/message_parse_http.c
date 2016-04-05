@@ -137,9 +137,55 @@ int rpc_message_parse_http_data(struct rpc_message * msg, const char * key, char
     int err;
 
     // First check if the data is in the path
-    // rpc_message_parse_http_data_path();
+    err = rpc_message_parse_http_data_path(msg, key, value, max_value);
+    if (err != 1) {
+        return EXIT_SUCCESS;
+    }
 
+    // If we get to here we have not successfully found the data yet
+    return -1;
+}
 
-    return EXIT_SUCCESS;
+// Look in the path for a data value
+int rpc_message_parse_http_data_path(struct rpc_message * msg, const char * key, char * value, int max_value) {
+    int err;
+
+    // Make sure there are headers
+    if (msg->headers == NULL || msg->length_headers == 0) {
+        errno = ENOMSG;
+        return -1;
+    }
+
+    // Look for the value in the path
+    char * value_start = strstr(msg->headers, key);
+    // value_start will be NULL if it couldnt find a question mark in
+    // msg->buffer
+    if (value_start == NULL) {
+        errno = ENOMEDIUM;
+        return -1;
+    }
+
+    // Look for the value in the path
+    value_start = strchr(msg->headers, '=') + (uintptr_t)1;
+    // value_start will be NULL if it couldnt find a question mark in
+    // msg->buffer
+    if (value_start == NULL) {
+        errno = EBADMSG;
+        return -1;
+    }
+
+    // Try to go the the start of the urlencoded data or to the HTTP protocol
+    // version so for the space it will grab the path from after the method to
+    // the next space before HTTP/X.X
+    int i;
+    char tryEnds[] = "& ";
+    for (i = 0; i < strlen(tryEnds); ++i) {
+        err = rpc_string_untildelim(value_start, value, max_value, tryEnds[i]);
+        if (err == EXIT_SUCCESS) {
+            return EXIT_SUCCESS;
+        }
+    }
+
+    return -1;
 }
 
