@@ -270,9 +270,13 @@ int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_i
         return -1;
     }
 
-    // Look thoguh all of the handlers and choose the appropriate one to call
-    // and return
-    for (handler = config->handlers; handler != NULL; ++handler) {
+#ifdef RPC_LOGGING
+    printf("Responding to method \"%s\"\n", msg->method);
+#endif
+
+    // Look through all of the handlers and choose the appropriate one to call
+    // and return. The handler list should be terminated with NULL
+    for (handler = config->handlers; *((uintptr_t *)handler) != (uintptr_t)NULL; ++handler) {
         if (0 == strncmp(msg->method, handler->method, strlen(handler->method))) {
             return handler->func(client, msg);
         }
