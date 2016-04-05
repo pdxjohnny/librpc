@@ -4,8 +4,18 @@
 Install
 ---
 
+From source:
+
 ```bash
+git clone https://github.com/pdxjohnny/cpp-rpc
 make clean && make && sudo make install
+```
+
+From Travis-CI build
+```bash
+wget https://github.com/pdxjohnny/cpp-rpc/releases/download/0.1/librpc.tar.gz
+sudo tar xvf librpc.tar.gz -C /
+rm librpc.tar.gz
 ```
 
 
