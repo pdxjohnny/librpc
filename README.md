@@ -8,6 +8,7 @@ From source:
 
 ```bash
 git clone https://github.com/pdxjohnny/cpp-rpc
+cd cpp-rpc
 make clean && make && sudo make install
 ```
 
@@ -26,8 +27,11 @@ The simplest example is in example/simple.ccp and once you have run `make &&
 make install` then it will compile with the following command.
 
 ```bash
-g++ -static test.cpp -lrpc -o test
+g++ -static example/simple.cpp -lrpc -o simple
+./simple
+echo $?
 ```
+> Should be 42
 
 
 Apache Benchmark
