@@ -80,10 +80,10 @@ int rpc_message_free(struct rpc_message *);
 // Fills field with the data sent over the request
 // return code is 0 for error 1 for success
 int rpc_field(struct rpc_message * msg, const char * key, char * value, int value_size);
-int rpc_int_field(struct rpc_message * msg, const char * key, int * value);
-int rpc_float_field(struct rpc_message * msg, const char * key, float * value);
+int rpc_field_int(struct rpc_message * msg, const char * key, int * value, int value_size);
+int rpc_field_float(struct rpc_message * msg, const char * key, float * value, int value_size);
 // One char not a char string
-int rpc_char_field(struct rpc_message * msg, const char * key, char * value);
+int rpc_field_char(struct rpc_message * msg, const char * key, char * value, int value_size);
 
 // Server handler
 struct rpc_handler {

@@ -156,8 +156,20 @@ int rpc_message_parse_http_data_path(struct rpc_message * msg, const char * key,
         return -1;
     }
 
+    // To avoid matching anywhere in the path we need to append the = to the
+    // key we are looking for
+    int len_key = strnlen(key, msg->buffer_limit);
+    // We will be adding one character
+    char key_equals[len_key + 1];
+    // Copy over the key
+    strncpy(key_equals, key, len_key);
+    // Add the =
+    key_equals[len_key] = '=';
+    // Move the NULL terminator to the end
+    key_equals[len_key + 1] = '\0';
+
     // Look for the value in the path
-    char * value_start = strstr(msg->headers, key);
+    char * value_start = strstr(msg->headers, key_equals);
     // value_start will be NULL if it couldnt find a question mark in
     // msg->buffer
     if (value_start == NULL) {
@@ -165,14 +177,8 @@ int rpc_message_parse_http_data_path(struct rpc_message * msg, const char * key,
         return -1;
     }
 
-    // Look for the value in the path
-    value_start = strchr(msg->headers, '=') + (uintptr_t)1;
-    // value_start will be NULL if it couldnt find a question mark in
-    // msg->buffer
-    if (value_start == NULL) {
-        errno = EBADMSG;
-        return -1;
-    }
+    // Advance to right past the =
+    value_start += (uintptr_t)(len_key + 1);
 
     // Try to go the the start of the urlencoded data or to the HTTP protocol
     // version so for the space it will grab the path from after the method to

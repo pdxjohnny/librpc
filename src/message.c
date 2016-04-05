@@ -117,7 +117,8 @@ int rpc_message_append_to_buffer(struct rpc_message * msg, const char * buffer, 
     return EXIT_SUCCESS;
 }
 
-// Search the response for key and store its value in value
+// Search the response for key and store its value in value value cannot be
+// longer than max_value
 int rpc_field(struct rpc_message * msg, const char * key, char * value, int max_value) {
     switch (msg->protocol) {
     case RPC_PROTOCOL_HTTP:
@@ -126,5 +127,62 @@ int rpc_field(struct rpc_message * msg, const char * key, char * value, int max_
 
     errno = ENOPROTOOPT;
     return -1;
-};
+}
+
+// Convert rpc_field to int
+int rpc_field_int(struct rpc_message * msg, const char * key, int * value, int max_value) {
+    int err;
+    char value_str[max_value];
+
+    // Get the bytes
+    err = rpc_field(msg, key, value_str, max_value);
+    if (err == -1) {
+        return -1;
+    }
+
+    // Convert then to the requested type
+    *value = strtol(value_str, NULL, 10);
+    if (errno == EINVAL || errno == ERANGE) {
+        return -1;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Convert rpc_field to float
+int rpc_field_float(struct rpc_message * msg, const char * key, float * value, int max_value) {
+    int err;
+    char value_str[max_value];
+
+    // Get the bytes
+    err = rpc_field(msg, key, value_str, max_value);
+    if (err == -1) {
+        return -1;
+    }
+
+    // Convert then to the requested type
+    *value = strtof(value_str, NULL);
+    if (errno == ERANGE) {
+        return -1;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Convert rpc_field to a single char
+int rpc_field_char(struct rpc_message * msg, const char * key, char * value, int max_value) {
+    int err;
+    char value_str[1];
+
+    // Get the bytes
+    err = rpc_field(msg, key, value_str, max_value);
+    if (err == -1) {
+        return -1;
+    }
+
+    // Should be character and then NULL
+    *value = value_str[0];
+
+    return EXIT_SUCCESS;
+}
 
