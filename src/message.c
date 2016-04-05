@@ -109,8 +109,14 @@ int rpc_message_append_to_buffer(struct rpc_message * msg, const char * buffer, 
     return EXIT_SUCCESS;
 }
 
-// Search the response for field and store it in ret
-int rpc_field(char * field, char * ret, struct rpc_message * msg) {
-    return EXIT_SUCCESS;
+// Search the response for key and store its value in value
+int rpc_field(char * key, char * value, struct rpc_message * msg) {
+    switch (msg->protocol) {
+    case RPC_PROTOCOL_HTTP:
+        return rpc_message_parse_http_body(msg);
+    }
+
+    errno = ENOPROTOOPT;
+    return -1;
 };
 

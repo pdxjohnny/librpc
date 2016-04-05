@@ -237,7 +237,19 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
         // Parse the request
         rpc_message_parse(&msg, buffer, bytes_read_last);
         // Done parsing
-    } while (!msg.parse_complete);
+    } while (!msg.parse_complete && !msg.incomplete);
+
+    // If there was an error parsing then incomplete will be set as true
+    // this should be treated as do not reply because something was wrong
+    // rather than not seting parse_complete which would mean that the meassage
+    // was ok we just didnt get to receive the rest of it
+    if (msg.incomplete) {
+        // Get rid of the message now that we are done with this client
+        rpc_message_free(&msg);
+        // Close the connection with the client
+        close(client);
+        return EXIT_SUCCESS;
+    }
 
     // Mark the message as incomplete if we stoped reading before it was done
     // being parsed

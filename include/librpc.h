@@ -133,6 +133,9 @@ struct rpc_client_config {
 // Client connectes to the server and preforms requests
 int rpc_client(struct rpc_client_config * config);
 
+// Reply to client functions
+int rpc_message_reply_http_413(struct rpc_message *);
+
 // String functions
 //  Used for string minipulation
 //
@@ -159,6 +162,12 @@ char * rpc_string_on_heap(const char * src, size_t max);
 // Protocols
 #define RPC_PROTOCOL_UNKNOWN 0
 #define RPC_PROTOCOL_HTTP 'h'
+
+// Protocol specfific constants
+#define RPC_MSG_HTTP_MAX_HEADER_LENGTH 8192
+
+// Caned replies
+#define RPC_REPLY_HTTP_413 "Status 413 HTTP/1.1\r\nContent-Length: 16\r\n\r\nEntity Too Large"
 
 // Error codes
 // ENOSOCK could not create server socket

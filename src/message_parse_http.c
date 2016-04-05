@@ -9,6 +9,9 @@ int rpc_message_parse_http(struct rpc_message * msg, const char * buffer, int bu
     // Append the new data to the messages buffer until we have recived all the
     // headers
     rpc_message_append_to_buffer(msg, buffer, buffer_size);
+    if (msg->length_recv > RPC_MSG_HTTP_MAX_HEADER_LENGTH) {
+        return rpc_message_reply_http_413(msg);
+    }
 
     // Make sure that we have at least all of the headers before we start
     // parsing the path and headers
