@@ -30,15 +30,12 @@ int rpc_message_parse_http(struct rpc_message * msg, const char * buffer, int bu
     // We have all the headers so the buffer now needs to point to the end of
     // the headers
     if (msg->length_recv > msg->length_headers) {
-        printf("More buffer than just headers\n");
-        printf("%03d   %03d\n", msg->length_recv, msg->length_headers);
-        msg->buffer = strstr(msg->headers, "\r\n\r\n") + (uintptr_t)4;
-        // Create a pipe that will be the same as reading from the socket only we
-        // are going to write the part of the body which we accidentaly capured
-        // into it first
-        int pipe_fd[2];
-        pipe(pipe_fd);
-        dup2(msg->client, pipe_fd[RPC_COMM_READ]);
+        // The start of the data starts at the end of the headers which will be
+        // a string which starts at the address at the end of the headers. Then
+        // copy that into buffer because now we have started to buffer the body
+        // of the message rather than the headers
+        rpc_message_append_to_buffer(msg, &msg->headers[msg->length_headers],
+            msg->length_recv - msg->length_headers);
     }
 
     // Parse the path which we will interperate as the method. If there is
