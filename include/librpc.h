@@ -26,10 +26,17 @@ struct rpc_message {
     unsigned int length;
     // Length recieved
     unsigned int length_recv;
+    // The length of the buffer because it may be different than the length of
+    // the headers or data
+    unsigned int length_buffer;
     // Length of the headers
     unsigned int length_headers;
     // The client that we are reading from
     int client;
+    // When looking for data we need to write to the buffer. However we dont
+    // know if the client will be sending tons of data therefore we need to set
+    // a limit on the size of the buffer
+    int buffer_limit;
     // Boolean values
     // Parse comepleted
     char parse_complete;
@@ -42,8 +49,7 @@ struct rpc_message {
     char * method;
     // Headers
     char * headers;
-    // Data paressed
-    char * data;
+    // Buffer for incoming data
     char * buffer;
 };
 
@@ -65,17 +71,18 @@ int rpc_message_parse_json(struct rpc_message *, const char *, int);
 int rpc_message_parse_http(struct rpc_message *, const char *, int);
 int rpc_message_parse_http_path(struct rpc_message *);
 int rpc_message_parse_http_header(struct rpc_message *, const char *, char *, int);
-int rpc_message_parse_http_body(struct rpc_message *);
+int rpc_message_parse_http_data(struct rpc_message *, const char *, char *, int);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);
 
 // Fills field with the data sent over the request
 // return code is 0 for error 1 for success
-int rpc_field(char * field, char * ret, struct rpc_message * msg);
-int rpc_int_field(int *);
-int rpc_float_field(float *);
-int rpc_char_field(char *);
+int rpc_field(struct rpc_message * msg, const char * key, char * value, int value_size);
+int rpc_int_field(struct rpc_message * msg, const char * key, int * value);
+int rpc_float_field(struct rpc_message * msg, const char * key, float * value);
+// One char not a char string
+int rpc_char_field(struct rpc_message * msg, const char * key, char * value);
 
 // Server handler
 struct rpc_handler {
@@ -156,8 +163,10 @@ char * rpc_string_on_heap(const char * src, size_t max);
 #define RPC_COMM_WRITE 1
 // Port length shouldnt be longer than 12
 #define RPC_GET_PORT_BUFFER_SIZE 12
-// For reading in client messages
+// For reading in client messages when the server reads
 #define RPC_MESSAGE_BUFFER_SIZE 1024
+// The default limit on the messages buffer
+#define RPC_MESSAGE_BUFFER_LIMIT 8192
 
 // Protocols
 #define RPC_PROTOCOL_UNKNOWN 0

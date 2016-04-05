@@ -133,7 +133,13 @@ int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, c
 }
 
 // Parse the body for data
-int rpc_message_parse_http_body(struct rpc_message * msg) {
+int rpc_message_parse_http_data(struct rpc_message * msg, const char * key, char * value, int max_value) {
+    int err;
+
+    // First check if the data is in the path
+    // rpc_message_parse_http_data_path();
+
+
     return EXIT_SUCCESS;
 }
 
