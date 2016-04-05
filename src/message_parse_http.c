@@ -74,8 +74,18 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
         return -1;
     }
 
-    // Grab the path so from after the method to the next space before HTTP/X.X
-    err = rpc_string_untildelim(path_start, path, msg->length_headers + 1, ' ');
+    // Try to go the the start of the urlencoded data or to the HTTP protocol
+    // version so for the space it will grab the path from after the method to
+    // the next space before HTTP/X.X
+    int i;
+    char tryEnds[] = "? ";
+    for (i = 0; i < strlen(tryEnds); ++i) {
+        err = rpc_string_untildelim(path_start, path, msg->length_headers + 1, tryEnds[i]);
+        if (err == EXIT_SUCCESS) {
+            break;
+        }
+    }
+    // If neither worked then something it wrong
     if (err == -1) {
         return -1;
     }
