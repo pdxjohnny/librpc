@@ -1,4 +1,23 @@
-# cpp-rpc
+# cpp-rpc [![Build Status](https://travis-ci.org/pdxjohnny/cpp-rpc.svg?branch=master)](https://travis-ci.org/pdxjohnny/cpp-rpc)
+
+
+Install
+---
+
+```bash
+make clean && make && sudo make install
+```
+
+
+Building With librpc
+---
+
+The simplest example is in example/simple.ccp and once you have run `make &&
+make install` then it will compile with the following command.
+
+```bash
+g++ -static test.cpp -lrpc -o test
+```
 
 
 Apache Benchmark

@@ -11,6 +11,7 @@
  *  Needs stuct of data that will be sent to method
 */
 #include <stdint.h>
+#include <stdlib.h>
 
 // So that cpp can link to this lib
 #if defined (__cplusplus)
