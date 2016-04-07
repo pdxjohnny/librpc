@@ -67,12 +67,13 @@ int rpc_message_parse_http_path(struct rpc_message * msg) {
     memset(path, 0, sizeof(path));
     // The path will be right after the HTTP method (GET, POST, HEAD) so we
     // have to find out where the http method ends and the path begins
-    char * path_start = strchr(msg->headers, ' ') + 2;
+    char * path_start = strchr(msg->headers, ' ');
     // path_start will be NULL if it couldnt find a space in msg->buffer
     if (path_start == NULL) {
         errno = EBADMSG;
         return -1;
     }
+    path_start += (uintptr_t)2;
 
     // Try to go the the start of the urlencoded data or to the HTTP protocol
     // version so for the space it will grab the path from after the method to
@@ -118,11 +119,12 @@ int rpc_message_parse_http_header(struct rpc_message * msg, const char * find, c
     }
 
     // Go the the delim between the header and its value
-    header = strchr(header, ':') + (uintptr_t)2;
+    header = strchr(header, ':');
     if (header == NULL) {
         errno = EBADMSG;
         return -1;
     }
+    header += (uintptr_t)2;
 
     // Grab the value of the header
     err = rpc_string_untildelim(header, store, store_max, '\r');

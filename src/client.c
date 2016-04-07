@@ -30,7 +30,7 @@ int rpc_client(struct rpc_client_config * config) {
     struct hostent * server_info;
     server_info = gethostbyname(config->addr);
     if (!server_info) {
-        errno = EADDR;
+        close(client);
         return -1;
     }
     server_addr.sin_addr = *(struct in_addr *) server_info->h_addr;
@@ -38,7 +38,7 @@ int rpc_client(struct rpc_client_config * config) {
     // Connect the client socket to the server
     err = connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (err == -1) {
-        errno = ENOCONNECT;
+        close(client);
         return -1;
     }
 

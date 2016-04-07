@@ -63,7 +63,9 @@ int rpc_server_start(struct rpc_server_config * config) {
     // Listen for incoming connections
     err = listen(server, SOMAXCONN);
     if (err == -1) {
-        errno = ELISTEN;
+        // Shutdown the server
+        shutdown(server, SHUT_RDWR);
+        close(server);
         return -1;
     }
 
@@ -104,12 +106,11 @@ int rpc_server_start(struct rpc_server_config * config) {
             client_addr_size = sizeof(client_addr);
             client = accept(server, (struct sockaddr *) &client_addr, &client_addr_size);
             if (client == -1) {
-                errno = EACCEPT;
                 return -1;
             }
             // Handle the client
             err = rpc_server_handle_client(config, &client_addr, client);
-            if (client == -1) {
+            if (err == -1) {
                 errno = EACCEPT;
                 return -1;
             }
@@ -121,19 +122,25 @@ int rpc_server_start(struct rpc_server_config * config) {
         // shutdown
         if (FD_ISSET(config->comm[RPC_COMM_READ], &read_from)) {
             // Read and print the message
-            char buffer[20];
+            int buffer_length;
+            char buffer[21];
+            char stop[] = "stop";
             // Initialize the buffer to NULL
             memset(buffer, 0, 20);
-            read(config->comm[RPC_COMM_READ], buffer, 20);
-            // Shutdown the server
-            shutdown(server, SHUT_RDWR);
-            close(server);
-            // Data was send so close the write end of the pipe
-            close(config->comm[RPC_COMM_WRITE]);
-            // Server is closed so we dont need the read end of the pipe anymore
-            close(config->comm[RPC_COMM_READ]);
-            // Exit 0 for all is well
-            exit(EXIT_SUCCESS);
+            buffer_length = read(config->comm[RPC_COMM_READ], buffer, 20);
+            // NULL terminate the buffer
+            buffer[buffer_length] = '\0';
+            if (strstr(buffer, stop) != NULL) {
+                // Shutdown the server
+                shutdown(server, SHUT_RDWR);
+                close(server);
+                // Data was send so close the write end of the pipe
+                close(config->comm[RPC_COMM_WRITE]);
+                // Server is closed so we dont need the read end of the pipe anymore
+                close(config->comm[RPC_COMM_READ]);
+                // Exit 0 for all is well
+                exit(EXIT_SUCCESS);
+            }
         }
 
     }
@@ -228,8 +235,10 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     do {
         // Clear the buffer
         memset(buffer, 0, sizeof(buffer));
-        // Read in the request
-        bytes_read_last = read(client, buffer, RPC_MESSAGE_BUFFER_SIZE);
+        // Read in the request leaving space to null terminate
+        bytes_read_last = read(client, buffer, RPC_MESSAGE_BUFFER_SIZE - 1);
+        // NULL terminate the string
+        buffer[bytes_read_last] = '\0';
         // Dont parse if there was no new data
         if (bytes_read_last < 1) {
             break;
