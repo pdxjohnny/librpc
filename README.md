@@ -1,4 +1,4 @@
-# cpp-rpc [![Travis Status](https://travis-ci.org/pdxjohnny/cpp-rpc.svg?branch=master)](https://travis-ci.org/pdxjohnny/cpp-rpc) [![Coverity Status](https://scan.coverity.com/projects/8482/badge.svg)](https://scan.coverity.com/projects/8482/)
+# cpp-rpc [![Travis Status](https://travis-ci.org/pdxjohnny/cpp-rpc.svg?branch=master)](https://travis-ci.org/pdxjohnny/cpp-rpc) [![Build Status](https://drone.carpoolme.net/api/badges/pdxjohnny/cpp-rpc/status.svg)](https://drone.carpoolme.net/pdxjohnny/cpp-rpc) [![Coverity Status](https://scan.coverity.com/projects/8482/badge.svg)](https://scan.coverity.com/projects/8482/)
 
 
 Install
