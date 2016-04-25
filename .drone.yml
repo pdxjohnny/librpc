@@ -1,0 +1,7 @@
+build:
+  image: gcc
+  commands:
+    - make clean
+    - make
+    - make test
+    - make benchmark
