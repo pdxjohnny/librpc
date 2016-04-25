@@ -6,6 +6,7 @@ LIBS=$(addprefix ./deps/,$(join $(addsuffix /bin/,$(LIB_NAMES)),$(addsuffix .a,$
 LIB_NAMES_CLEAN=$(addprefix ./clean/,$(LIB_NAMES))
 # Compiler settings
 CC=gcc
+TEST_CC=g++
 AR=ar
 ARFLAGS=rcs
 CFLAGS=-g -fPIC -Wall -c -I./include/ $(LIB_HEADERS)
@@ -68,11 +69,11 @@ obj/lib/%.o: src/%.c
 # Build tests
 $(TEST): $(TEST_OBJECTS) $(LIB)
 	@mkdir -p bin
-	$(CC) $(LDFLAGS) $(TEST_OBJECTS) $(LIBS) $(LIB) -o $@
+	$(TEST_CC) $(LDFLAGS) $(TEST_OBJECTS) $(LIBS) $(LIB) -o $@
 
 obj/test/%.o: test/%.cpp
 	@mkdir -p obj/test
-	$(CC) $(CFLAGS) $< -o $@
+	$(TEST_CC) $(CFLAGS) $< -o $@
 
 .PHONY: test
 test: $(LIB_NAMES_TEST)
@@ -85,11 +86,11 @@ $(LIB_NAMES_TEST):
 # Build benchmarks
 $(BENCHMARK): $(BENCHMARK_OBJECTS) $(LIB)
 	@mkdir -p bin
-	$(CC) $(LDFLAGS) $(BENCHMARK_OBJECTS) $(LIBS) $(LIB) -o $@
+	$(TEST_CC) $(LDFLAGS) $(BENCHMARK_OBJECTS) $(LIBS) $(LIB) -o $@
 
 obj/benchmark/%.o: benchmark/%.cpp
 	@mkdir -p obj/benchmark
-	$(CC) $(CFLAGS) $< -o $@
+	$(TEST_CC) $(CFLAGS) $< -o $@
 
 .PHONY: benchmark
 benchmark: $(LIB_NAMES_BENCHMARK)
