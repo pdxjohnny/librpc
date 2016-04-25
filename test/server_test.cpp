@@ -8,11 +8,11 @@ int test_server_correct_port() {
     char addr[] = "127.0.0.1";
     int comm[2];
     struct rpc_server_config server_config = {
-        .addr = addr,
-        .port = port,
-        .handlers = NULL,
-        .not_found = NULL,
-        .comm = comm
+       /* .addr = */ addr,
+       /* .port = */ port,
+       /* .handlers = */ NULL,
+       /* .not_found = */ NULL,
+       /* .comm = */ comm
     };
 
     // Start the server in the background
@@ -38,11 +38,11 @@ int test_server_correct_handler() {
     char addr[] = "127.0.0.1";
     int comm[2];
     struct rpc_server_config server_config = {
-        .addr = addr,
-        .port = port,
-        .handlers = NULL,
-        .not_found = NULL,
-        .comm = comm
+       /* .addr = */ addr,
+       /* .port = */ port,
+       /* .handlers = */ NULL,
+       /* .not_found = */ NULL,
+       /* .comm = */ comm
     };
 
     // Start the server in the background

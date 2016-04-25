@@ -8,17 +8,17 @@ int test_client_contact_server () {
     char addr[] = "127.0.0.1";
     int comm[2];
     struct rpc_server_config server_config = {
-        .addr = addr,
-        .port = port,
-        .handlers = NULL,
-        .not_found = NULL,
-        .comm = comm
+       /* .addr = */ addr,
+       /* .port = */ port,
+       /* .handlers = */ NULL,
+       /* .not_found = */ NULL,
+       /* .comm = */ comm
     };
 
     // Configure the client
     struct rpc_client_config client_config = {
-        .addr = addr,
-        .port = 0,
+       /* .addr = */ addr,
+       /* .port = */ 0,
     };
 
     // Start the server in the background
