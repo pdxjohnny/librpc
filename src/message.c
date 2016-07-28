@@ -185,3 +185,15 @@ int rpc_field_char(struct rpc_message * msg, const char * key, char * value, int
     return EXIT_SUCCESS;
 }
 
+// Replys with the correct handler not found message for the requests protocol
+int rpc_message_reply_default_not_found(struct rpc_message * msg) {
+    switch (msg->protocol) {
+    case RPC_PROTOCOL_HTTP:
+        return rpc_message_reply_http_404(msg);
+    }
+
+    // We dont know their protocol so just tell them not found
+    msg->incomplete = 1;
+    write(msg->client, RPC_REPLY_NOT_FOUND, strlen(RPC_REPLY_NOT_FOUND));
+    return EXIT_SUCCESS;
+}
