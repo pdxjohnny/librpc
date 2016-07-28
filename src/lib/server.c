@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 
 // Starts listening and calls handlers based on their applicability to the path

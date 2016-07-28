@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 int rpc_test () {
     return 42;

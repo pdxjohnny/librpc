@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 // Makes requests based off the information provided in config
 int rpc_client(struct rpc_client_config * config) {

@@ -20,6 +20,7 @@ Makefile.in
 /install-sh
 /missing
 /stamp-h1
+/ar-lib
 
 
 # Object files
@@ -37,6 +38,7 @@ Makefile.in
 *.a
 *.la
 *.lo
+*.deps/
 
 # Shared objects (inc. Windows DLLs)
 *.dll
