@@ -17,6 +17,6 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: EVYa3fUvZP9dmIwKxuIM+MCsTksfbCElQNg7O39uIRBvGbxN3+WEIgvHyoWWOhiOvFH6f15bPu1CL13KSZ8A0N1p0nnePj6CvMbIKLF//KSaM4jQhPmPXG4ABo8CfB9Sr7vPw4RJYE6wG7wvGQ4zBVcmpRWm6+9F2G/YaczmGk2BuLTeyC3yF/3dlx0yXZV2c+cFSnOEFVL4P4Bcy/dBFzd+pZRGEwaNgfEC2vL2LHLY11dsRql6AVFRM5/kauH9CAK2WrkTGtYtt9ahYxHJR1DIrGBv+zEgG0ZpXqiyQK1au3/jzId71EQRVY+rtk8RZBA16mdqoLuGLao2OTYC30EJmJBVwK2BUxBasfKMlSKRzvH3xcOYyZUQ8iJkkVLEltlEMWGUxAn6AFyjMglXvgSmiQiEJEjDJp4te7D17CxjmJvqYugiYEiJMu/UEEqFLohC6geXRm801FHdTvOjOkJrNg9DpwMUbJDMlZhfTgJdc7ickeIfhPOTwPFieNO2mYnEssGr1DfR28dBvvR6k/1NAnyrOrTrh2BND71b3YNmsHOUJGR5DSvu65w7oKZIcHPanmyRx+ucNhy3sM1QJiD9lLs4riLg9KCqHwWWEHYc6qcuDi9wTcT2se77TNjcyFezhQ2upXxCliG9uchRACbdpwR8GSO//xj1roNPSbk=
-  file: bin/librpc-1.0.tar.gz
+  file: librpc-1.0.tar.gz
   on:
     repo: pdxjohnny/cpp-rpc
