@@ -45,19 +45,18 @@ int rpc_server_start(struct rpc_server_config * config) {
         errno = EPORT;
         return -1;
     }
-    // Set the port in the config
     uint16_t port;
-    char port_string[12];
-    memset(port_string, 0, sizeof(port_string));
-    // Grab the port it will be in network byte order
-    sprintf(port_string, "%d", server_addr.sin_port);
-    // Put that network byte order port into a int
-    port = atoi(port_string);
-    // Now we can convert it back to host byte order
-    port = ntohs(port);
-    // Send that port back to whatever started the server
-    sprintf(port_string, "%d", port);
-    write(config->comm[RPC_COMM_WRITE], port_string, strlen(port_string));
+    // Send the port back if anyone is listening
+    if (config->comm != NULL) {
+        char port_string[12];
+        memset(port_string, 0, sizeof(port_string));
+        // Grab the port it will be in network byte order and convert it back to
+        // host byte order
+        port = ntohs(server_addr.sin_port);
+        // Send that port back to whatever started the server
+        sprintf(port_string, "%d", port);
+        write(config->comm[RPC_COMM_WRITE], port_string, strlen(port_string));
+    }
 
     // Listen for incoming connections
     err = listen(server, SOMAXCONN);
@@ -74,16 +73,19 @@ int rpc_server_start(struct rpc_server_config * config) {
 
     // Accept connections until we recv information from the pipe telling us to
     // do otherwise
+    uint64_t max_fd = server + 1U;
     while (1) {
         // Get rid of the old sockets
         FD_ZERO(&read_from);
 
         // Put the sockets we care about reading from into the read set
         FD_SET(server, &read_from);
-        FD_SET(config->comm[RPC_COMM_READ], &read_from);
-
-        // Find the max file descriptor that we will be reading from
-        int max_fd = MAX(config->comm[RPC_COMM_READ], server) + 1;
+        // If there is no comm then we cant read from it
+        if (config->comm != NULL) {
+            FD_SET(config->comm[RPC_COMM_READ], &read_from);
+            // Find the max file descriptor that we will be reading from
+            max_fd = MAX(config->comm[RPC_COMM_READ], server) + 1U;
+        }
 
         // Now preform the select to see which gets data first
         // select returns the number of file descriptors that are ready to be
@@ -119,14 +121,15 @@ int rpc_server_start(struct rpc_server_config * config) {
         // shutdown the server. Maybe in the future this will do other things
         // but for know sending anything into comm tells this server to
         // shutdown
-        if (FD_ISSET(config->comm[RPC_COMM_READ], &read_from)) {
+        if (config->comm != NULL && FD_ISSET(config->comm[RPC_COMM_READ], &read_from)) {
             // Read and print the message
-            int buffer_length;
-            char buffer[21];
+            const uint8_t buffer_size = 21;
+            char buffer[buffer_size];
             char stop[] = "stop";
+            int buffer_length = 0;
             // Initialize the buffer to NULL
-            memset(buffer, 0, 20);
-            buffer_length = read(config->comm[RPC_COMM_READ], buffer, 20);
+            memset(buffer, 0, buffer_size);
+            buffer_length = read(config->comm[RPC_COMM_READ], buffer, buffer_size);
             // NULL terminate the buffer
             buffer[buffer_length] = '\0';
             if (strstr(buffer, stop) != NULL) {
@@ -138,7 +141,7 @@ int rpc_server_start(struct rpc_server_config * config) {
                 // Server is closed so we dont need the read end of the pipe anymore
                 close(config->comm[RPC_COMM_READ]);
                 // Exit 0 for all is well
-                exit(EXIT_SUCCESS);
+                return EXIT_SUCCESS;
             }
         }
 
@@ -191,7 +194,7 @@ int rpc_server_start_background(struct rpc_server_config * config) {
         config->comm = server_comm;
         // Start the server dont worry about capturing the exit because we have
         // no way to send it to the parent as of now
-        return rpc_server_start(config);
+        exit(rpc_server_start(config));
 
     default:
         // Parent
@@ -266,7 +269,7 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     }
 
     // Call whatever handler is appropriate
-    rpc_server_reply_client(config, client_addr, client, &msg);
+    rpc_server_reply_client(config, client_addr, &msg);
     // Send the client some information
     // char msg[] = "Hello World";
     // send(client, msg, strlen(msg), 0);
@@ -281,13 +284,12 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
 }
 
 // Pick the correct method to use in our reply to the client
-int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, int client, struct rpc_message * msg) {
+int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, struct rpc_message * msg) {
     // Make sure there are some handlers to check
     struct rpc_handler * handler;
     if (config->handlers == NULL && config->not_found == NULL) {
-        // Couldnt find that method
-        errno = ENOSYS;
-        return -1;
+        // They didnt define a not found function so call the default
+        return rpc_message_reply_default_not_found(msg);
     }
 
 #ifdef RPC_LOGGING
@@ -297,12 +299,12 @@ int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_i
     // Look through all of the handlers and choose the appropriate one to call
     // and return. The handler list should be terminated with NULL
     for (handler = config->handlers; *((uintptr_t *)handler) != (uintptr_t)NULL; ++handler) {
-        if (0 == strncmp(msg->method, handler->method, strlen(handler->method))) {
-            return handler->func(client, msg);
+        // msg->method is the untrusted input
+        if (0 == strncmp(handler->method, msg->method, strlen(handler->method))) {
+            return handler->func(msg);
         }
     }
 
-    // Couldnt find that method so call the not_found handler
-    return config->not_found(client, msg);
+    // Couldnt find that method so call the user defined not_found handler
+    return config->not_found(msg);
 }
-

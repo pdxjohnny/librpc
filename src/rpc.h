@@ -102,7 +102,7 @@ struct rpc_handler {
     char * method;
     // Handlers should accpet the client file descriptor and the message sent
     // by the client
-    int (*func)(int, struct rpc_message *);
+    int (*func)(struct rpc_message *);
 };
 
 // Server config
@@ -116,7 +116,7 @@ struct rpc_server_config {
     struct rpc_handler * handlers;
     // The handler to call if no handlers are found that match the requested
     // method
-    int (*not_found)(int, struct rpc_message *);
+    int (*not_found)(struct rpc_message *);
     // Used to stop the server gracefully. This is the file descriptor of
     // anything that can be feed to select. See man 3 pselect for details
     // It is an array which needs the first fd to be readable and the second to
@@ -137,7 +137,7 @@ int rpc_server_stop(struct rpc_server_config *);
 int rpc_server_handle_client(struct rpc_server_config *, struct sockaddr_in *, int);
 
 // Pick the correct handler to reply to the client
-int rpc_server_reply_client(struct rpc_server_config *, struct sockaddr_in *, int, struct rpc_message *);
+int rpc_server_reply_client(struct rpc_server_config *, struct sockaddr_in *, struct rpc_message *);
 
 // Client config
 struct rpc_client_config {
@@ -153,6 +153,9 @@ struct rpc_client_config {
 int rpc_client(struct rpc_client_config * config);
 
 // Reply to client functions
+int rpc_message_reply_default_not_found(struct rpc_message *);
+// HTTP
+int rpc_message_reply_http_404(struct rpc_message *);
 int rpc_message_reply_http_413(struct rpc_message *);
 
 // String functions
@@ -188,7 +191,10 @@ char * rpc_string_on_heap(const char * src, size_t max);
 #define RPC_MSG_HTTP_MAX_HEADER_LENGTH 8192
 
 // Caned replies
-#define RPC_REPLY_HTTP_413 "Status 413 HTTP/1.1\r\nContent-Length: 16\r\n\r\nEntity Too Large"
+#define RPC_REPLY_NOT_FOUND "Not Found"
+// HTTP
+#define RPC_REPLY_HTTP_404 "HTTP/1.1 404 Not Found\r\nContent-Length: 9\r\n\r\nNot Found"
+#define RPC_REPLY_HTTP_413 "HTTP/1.1 413 Request Entity Too Large\r\nContent-Length: 16\r\n\r\nEntity Too Large"
 
 // Error codes
 // ENOSOCK could not create server socket
