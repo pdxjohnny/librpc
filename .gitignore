@@ -68,3 +68,6 @@ src/.deps/
 src/Makefile
 
 *.swp
+
+# Binaries
+src/rpcd

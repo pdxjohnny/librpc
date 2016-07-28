@@ -6,6 +6,6 @@ AC_PROG_RANLIB
 # AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
  Makefile
- src/lib/Makefile
+ src/Makefile
 ])
 AC_OUTPUT
