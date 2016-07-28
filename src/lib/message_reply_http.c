@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 int rpc_message_reply_http_413(struct rpc_message * msg) {
     msg->incomplete = 1;

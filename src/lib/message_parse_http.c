@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 // Parse an http mesage
 int rpc_message_parse_http(struct rpc_message * msg, const char * buffer, int buffer_size) {

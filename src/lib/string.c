@@ -1,5 +1,4 @@
-#include "rpc.h"
-#include <librpc.h>
+#include <rpc.h>
 
 // Fills first with the first section of src, segment is up to delim
 int rpc_string_untildelim(const char * src, char * dest, int dest_size, char delim) {
