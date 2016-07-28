@@ -1,5 +1,5 @@
 language: c
-script: make clean && make -j && make test && make benchmark && make tar
+script: autoreconf -vi && ./configure && make -j && make check dist clean
 env:
   global:
   - secure: wRdhnYJWHPFXve0XnIJd394OcrGTfjkE7+jcXnvVS7LAmNK3J070tPL2ohmtoqpT4fS2AZjH/Zl7qJiRB0VfmQ8VCr9CM46R9/wC9CF/lUWgRyxOeBGmeGvT/LQZcQaXIsNupXDfNT7SZLiUuVV3+5DnZ5Rl7ONLH0mLivBkj0dLVWtA0fngO80iBvQo0outK2wOEhLpARasbOFj81dsWnN0oLhWS7Njl1MvCTQGSxg43cT1BYqllFM87vBRbDF/MWazBymHxA+w8gsWYi5O+CfJ4aySQTowUW8WieZMcXLQIDgjCI8qOhBBz0Z9bErOee8pwmfCy8GWt9h/vXslKnI2C2OPpB8xYQOXakncTD4K2+IlCBC8c3itrq3m8bw7g3Ta1FJ5KPmkqkihaysszSbBpd8xuhtvhDECFHSAwaRRVub8rFD32Zrt7cY9fCRX8QAHd3203Zo5SrmjARKabuDUGfA6VxAw4ovnT2eEDl01McPb200OThhlObmi1FbVvLNws9q7tu4/F3hE7XDdd8Ud5EJLAy+qHP9ZfH+q3lcEqBUeCtRGTjtf92fwYiQh6Jnebis00LJtLgrr4ys9MPCVzhwGCWrl3jim4XajicV3og7v9yyeNloFZcmR9miKSk+SIJppSL0evDRY4geXmppWAUPfsBA/UnovyG9PJQI=
@@ -10,13 +10,13 @@ addons:
       description: Build submitted via Travis CI
     notification_email: johnandersenpdx@gmail.com
     build_command_prepend: make clean
-    build_command: make -j 4
+    build_command: make -j
     branch_pattern: coverity_scan
 deploy:
   provider: releases
   skip_cleanup: true
   api_key:
     secure: EVYa3fUvZP9dmIwKxuIM+MCsTksfbCElQNg7O39uIRBvGbxN3+WEIgvHyoWWOhiOvFH6f15bPu1CL13KSZ8A0N1p0nnePj6CvMbIKLF//KSaM4jQhPmPXG4ABo8CfB9Sr7vPw4RJYE6wG7wvGQ4zBVcmpRWm6+9F2G/YaczmGk2BuLTeyC3yF/3dlx0yXZV2c+cFSnOEFVL4P4Bcy/dBFzd+pZRGEwaNgfEC2vL2LHLY11dsRql6AVFRM5/kauH9CAK2WrkTGtYtt9ahYxHJR1DIrGBv+zEgG0ZpXqiyQK1au3/jzId71EQRVY+rtk8RZBA16mdqoLuGLao2OTYC30EJmJBVwK2BUxBasfKMlSKRzvH3xcOYyZUQ8iJkkVLEltlEMWGUxAn6AFyjMglXvgSmiQiEJEjDJp4te7D17CxjmJvqYugiYEiJMu/UEEqFLohC6geXRm801FHdTvOjOkJrNg9DpwMUbJDMlZhfTgJdc7ickeIfhPOTwPFieNO2mYnEssGr1DfR28dBvvR6k/1NAnyrOrTrh2BND71b3YNmsHOUJGR5DSvu65w7oKZIcHPanmyRx+ucNhy3sM1QJiD9lLs4riLg9KCqHwWWEHYc6qcuDi9wTcT2se77TNjcyFezhQ2upXxCliG9uchRACbdpwR8GSO//xj1roNPSbk=
-  file: bin/librpc.tar.gz
+  file: bin/librpc-1.0.tar.gz
   on:
     repo: pdxjohnny/cpp-rpc

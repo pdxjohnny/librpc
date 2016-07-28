@@ -1,7 +1,7 @@
 build:
   image: gcc
   commands:
-    - make clean
-    - make
-    - make test
-    - make benchmark
+    - autoreconf -vi
+    - ./configure
+    - make -j
+    - make check dist clean
