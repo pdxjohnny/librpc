@@ -182,6 +182,10 @@ char * rpc_string_on_heap(const char * src, size_t max);
 #define RPC_MESSAGE_BUFFER_SIZE 1024
 // The default limit on the messages buffer
 #define RPC_MESSAGE_BUFFER_LIMIT 8192
+// Talk back to server after reply to tell it how it went
+#define RPC_HANDLE_SUCCESS 0
+#define RPC_HANDLE_FAILURE 1
+#define RPC_HANDLE_FATAL 2
 
 // Protocols
 #define RPC_PROTOCOL_UNKNOWN 0
