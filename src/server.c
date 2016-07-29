@@ -225,6 +225,8 @@ int rpc_server_stop(struct rpc_server_config * config) {
 
 // Called on new client accept
 int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, int client) {
+    // So we know what to do with the response
+    int res = RPC_HANDLE_SUCCESS;
     // Message we are receiving
     struct rpc_message msg;
     rpc_message_init(&msg);
@@ -269,7 +271,13 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
     }
 
     // Call whatever handler is appropriate
-    rpc_server_reply_client(config, client_addr, &msg);
+    switch(rpc_server_reply_client(config, client_addr, &msg)) {
+        case RPC_HANDLE_FATAL:
+            return -1;
+        default:
+            break;
+    }
+
     // Send the client some information
     // char msg[] = "Hello World";
     // send(client, msg, strlen(msg), 0);
@@ -287,24 +295,27 @@ int rpc_server_handle_client(struct rpc_server_config * config, struct sockaddr_
 int rpc_server_reply_client(struct rpc_server_config * config, struct sockaddr_in * client_addr, struct rpc_message * msg) {
     // Make sure there are some handlers to check
     struct rpc_handler * handler;
-    if (config->handlers == NULL && config->not_found == NULL) {
-        // They didnt define a not found function so call the default
-        return rpc_message_reply_default_not_found(msg);
-    }
 
 #ifdef RPC_LOGGING
     printf("Responding to method \"%s\"\n", msg->method);
 #endif
 
-    // Look through all of the handlers and choose the appropriate one to call
-    // and return. The handler list should be terminated with NULL
-    for (handler = config->handlers; *((uintptr_t *)handler) != (uintptr_t)NULL; ++handler) {
-        // msg->method is the untrusted input
-        if (0 == strncmp(handler->method, msg->method, strlen(handler->method))) {
-            return handler->func(msg);
+    if (config->handlers != NULL) {
+        // Look through all of the handlers and choose the appropriate one to call
+        // and return. The handler list should be terminated with NULL
+        for (handler = config->handlers; *((uintptr_t *)handler) != (uintptr_t)NULL; ++handler) {
+            // msg->method is the untrusted input
+            if (0 == strncmp(handler->method, msg->method, strlen(handler->method))) {
+                return handler->func(msg);
+            }
         }
     }
 
     // Couldnt find that method so call the user defined not_found handler
-    return config->not_found(msg);
+    if (config->not_found != NULL) {
+        return config->not_found(msg);
+    }
+
+    // They didnt define a not found function so call the default
+    return rpc_message_reply_default_not_found(msg);
 }

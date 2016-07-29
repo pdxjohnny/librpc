@@ -1,5 +1,11 @@
 #include <rpc.h>
 
+int reply(struct rpc_message * msg) {
+    const char rsp[] = "tada";
+    write(msg->client, rsp, strlen(rsp));
+    return RPC_HANDLE_FATAL;
+}
+
 int main (int argc, char **argv) {
     int err;
 
@@ -14,7 +20,7 @@ int main (int argc, char **argv) {
        /* .addr = */ addr,
        /* .port = */ port,
        /* .handlers = */ NULL,
-       /* .not_found = */ NULL,
+       /* .not_found = */ reply,
        /* .comm = */ NULL
     };
 
