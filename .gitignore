@@ -71,3 +71,4 @@ src/Makefile
 
 # Binaries
 src/rpcd
+src/rpcc

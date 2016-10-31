@@ -9,6 +9,7 @@ int rpc_message_init(struct rpc_message * msg) {
     msg->length = 0;
     msg->length_recv = 0;
     msg->length_headers = 0;
+    msg->length_buffer = 0;
     msg->client = 0;
     msg->buffer_limit = RPC_MESSAGE_BUFFER_LIMIT;
     msg->parse_complete = 0;
@@ -54,6 +55,8 @@ int rpc_message_parse_protocol(struct rpc_message * msg, const char * buffer, in
     switch (msg->protocol) {
     case RPC_PROTOCOL_HTTP:
         return rpc_message_parse_http(msg, buffer, buffer_size);
+    case RPC_PROTOCOL_RAW:
+        return rpc_message_parse_raw(msg, buffer, buffer_size);
     }
 
     errno = ENOPROTOOPT;
