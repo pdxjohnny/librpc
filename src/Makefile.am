@@ -1,4 +1,4 @@
-noinst_LIBRARIES = librpc.a
+lib_LIBRARIES = librpc.a
 librpc_a_SOURCES = client.c message.c message_parse_raw.c message_parse_http.c message_reply_http.c send.c send_raw.c server.c string.c
 include_HEADERS = rpc.h
 
