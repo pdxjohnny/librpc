@@ -84,6 +84,19 @@ int rpc_message_parse_http_path(struct rpc_message *);
 int rpc_message_parse_http_header(struct rpc_message *, const char *, char *, int);
 int rpc_message_parse_http_data(struct rpc_message *, const char *, char *, int);
 int rpc_message_parse_http_data_path(struct rpc_message *, const char *, char *, int);
+// RAW
+int rpc_message_parse_raw(struct rpc_message *, const char *, int);
+
+// Send messsages
+int rpc_message_send(struct rpc_message * msg);
+// Methods to send for various protocols
+// RAW
+int rpc_message_send_raw(struct rpc_message * msg);
+// HTTP
+int rpc_message_send_http(struct rpc_message * msg);
+
+// Recv messages
+int rpc_message_recv(struct rpc_message * msg);
 
 // Free the message when we are done with it
 int rpc_message_free(struct rpc_message *);
@@ -145,12 +158,12 @@ struct rpc_client_config {
     char * addr;
     // The port of the server we are connecting to
     uint16_t port;
-    // The message to deliver
-    struct rpc_message * msg;
+    // The client socket connection to the server
+    int client;
 };
 
 // Client connectes to the server and preforms requests
-int rpc_client(struct rpc_client_config * config);
+int rpc_client_start(struct rpc_client_config * config);
 
 // Reply to client functions
 int rpc_message_reply_default_not_found(struct rpc_message *);
@@ -190,6 +203,7 @@ char * rpc_string_on_heap(const char * src, size_t max);
 // Protocols
 #define RPC_PROTOCOL_UNKNOWN 0
 #define RPC_PROTOCOL_HTTP 'h'
+#define RPC_PROTOCOL_RAW 'r'
 
 // Protocol specfific constants
 #define RPC_MSG_HTTP_MAX_HEADER_LENGTH 8192

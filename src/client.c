@@ -1,7 +1,7 @@
 #include <rpc.h>
 
 // Makes requests based off the information provided in config
-int rpc_client(struct rpc_client_config * config) {
+int rpc_client_start(struct rpc_client_config * config) {
     int err;
     int client;
     struct sockaddr_in server_addr;
@@ -41,79 +41,40 @@ int rpc_client(struct rpc_client_config * config) {
         return -1;
     }
 
-    // We want to know when the server is trying to send us data (read_from)
-    // and when the server is ready for us to write data to it (write_to)
-    fd_set read_from;
-    fd_set write_to;
-    fd_set err_sock;
+    config->client = client;
 
-    // Accept connections until we recv information from the pipe telling us to
-    // do otherwise
-    while (1) {
-        // Get rid of the old sockets
-        FD_ZERO(&read_from);
-        FD_ZERO(&write_to);
-        FD_ZERO(&err_sock);
-
-        // Check if our client can read from or write to the server
-        FD_SET(client, &read_from);
-        FD_SET(client, &write_to);
-        FD_SET(client, &err_sock);
-
-        // Find the max file descriptor that we will be reading from
-        // As of know we only have the one for client
-        int max_fd = MAX(0, client) + 1;
-
-        // Now preform the select to see which gets data first
-        // select returns the number of file descriptors that are ready to be
-        // acted on that number id -1 if there was an error
-        // last argument is zero because there is no need for a timeout just
-        // wait indefinatly, this is all we care about we need a response
-        err = select(max_fd, &read_from, &write_to, &err_sock, 0);
-
-        // Select will return -1 if it had an error
-        if (err == -1) {
-            errno = ESELECT;
-            return -1;
-        }
-
-        // If the server is trying to write data to us our client will be in
-        // the read_from array
-        if (FD_ISSET(client, &read_from)) {
-            // Read 100 bytes from the server
-            // char buffer[100];
-            // Keep track of how many bytes we actually got from the server
-            // int n_recv;
-            // n_recv = read(client, buffer, 100);
-            // Display the message (just for now)
-            // printf("Got %d bytes from server \'%s\'\n", n_recv, buffer);
-            // Close the connection with the server
-            close(client);
-            return 10;
-        }
-        // If the server is waiting for use to send it data then it will be in
-        // the write_to array
-        if (FD_ISSET(client, &write_to)) {
-            // Send the server some information
-            char msg[] = "Hello World";
-            send(client, msg, strlen(msg), 0);
-            // Close the connection with the server
-            close(client);
-            return 20;
-        }
-        // If we are in the error state then we haave probably been
-        // disconnected from the server
-        if (FD_ISSET(client, &err_sock)) {
-            // Close the connection with the server
-            close(client);
-            // Let the caller know there was an error
-            errno = ENOTCONN;
-            return -1;
-        }
-
-    }
-
-    // We should never get to here
     return EXIT_SUCCESS;
 }
 
+int rpc_message_recv(struct rpc_message * msg) {
+    // So we know what to do with the response
+    int res = RPC_HANDLE_SUCCESS;
+    // Buffer to recv incoming data
+    char buffer[RPC_MESSAGE_BUFFER_SIZE];
+
+    // Read in the message that the client sent
+    int bytes_read_last = 0;
+    do {
+        // Clear the buffer
+        memset(buffer, 0, sizeof(buffer));
+        // Read in the request leaving space to null terminate
+        bytes_read_last = read(msg->client, buffer, RPC_MESSAGE_BUFFER_SIZE - 1);
+        // NULL terminate the string
+        buffer[bytes_read_last] = '\0';
+        // Dont parse if there was no new data
+        if (bytes_read_last < 1) {
+            break;
+        }
+        // Parse the request
+        rpc_message_parse(msg, buffer, bytes_read_last);
+        // Done parsing
+    } while (!msg->parse_complete && !msg->incomplete);
+
+    // Mark the message as incomplete if we stoped reading before it was done
+    // being parsed
+    if (!msg->parse_complete) {
+        msg->incomplete = 1;
+    }
+
+    return EXIT_SUCCESS;
+}
