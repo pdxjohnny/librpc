@@ -1,4 +1,4 @@
-# cpp-rpc [![Travis Status](https://travis-ci.org/pdxjohnny/cpp-rpc.svg?branch=master)](https://travis-ci.org/pdxjohnny/cpp-rpc) [![Build Status](https://drone.carpoolme.net/api/badges/pdxjohnny/cpp-rpc/status.svg)](https://drone.carpoolme.net/pdxjohnny/cpp-rpc) [![Coverity Status](https://scan.coverity.com/projects/8482/badge.svg)](https://scan.coverity.com/projects/8482/)
+# librpc [![Travis Status](https://travis-ci.org/pdxjohnny/librpc.svg?branch=master)](https://travis-ci.org/pdxjohnny/librpc) [![Coverity Status](https://scan.coverity.com/projects/8482/badge.svg)](https://scan.coverity.com/projects/8482/)
 
 
 Install
@@ -7,16 +7,12 @@ Install
 From source:
 
 ```bash
-git clone https://github.com/pdxjohnny/cpp-rpc
-cd cpp-rpc
-make clean && make && sudo make install
-```
-
-From Travis-CI build
-```bash
-wget https://github.com/pdxjohnny/cpp-rpc/releases/download/0.1/librpc.tar.gz
-sudo tar xvf librpc.tar.gz -C /
-rm librpc.tar.gz
+git clone https://github.com/pdxjohnny/librpc
+cd librpc
+autoreconf -i
+./configure
+make
+sudo make install
 ```
 
 
@@ -60,7 +56,7 @@ Completed 10000 requests
 Finished 10000 requests
 
 
-Server Software:        cpp-rpc
+Server Software:        librpc
 Server Hostname:        192.168.1.20
 Server Port:            40000
 
@@ -99,4 +95,3 @@ Percentage of the requests served within a certain time (ms)
   99%      7
  100%     23 (longest request)
 ```
-
