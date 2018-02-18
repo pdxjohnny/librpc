@@ -10,7 +10,7 @@ addons:
       description: Build submitted via Travis CI
     notification_email: johnandersenpdx@gmail.com
     build_command_prepend: make clean
-    build_command: make -j
+    build_command: make -j$(nproc)
     branch_pattern: coverity_scan
 deploy:
   provider: releases
