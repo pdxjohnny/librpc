@@ -72,3 +72,4 @@ src/Makefile
 # Binaries
 src/rpcd
 src/rpcc
+src/fuzz_message_parse_http
